@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "659291753409",
+    "project_id": "esdc-restaurant",
+    "storage_bucket": "esdc-restaurant.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:659291753409:android:3d3a3730fb2f8a2662bd40",
+        "android_client_info": {
+          "package_name": "com.example.restaurant_management"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyB1hqBZzd2CqBYRHrhVX9BED0DMFYSwgt0"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
