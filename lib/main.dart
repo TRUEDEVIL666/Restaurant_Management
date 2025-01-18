@@ -9,7 +9,7 @@ void main() async{
   );
   runApp(MaterialApp(
     home: Login(),
-    debugShowCheckedModeBanner: true,
+    debugShowCheckedModeBanner: false,
   ));
 }
 
