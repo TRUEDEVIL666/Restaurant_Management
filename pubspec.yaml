@@ -30,6 +30,8 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
+  firebase_core: 3.10.0
+  cloud_firestore: ^5.6.1
 
   # The following adds the Cupertino Icons font to your application.
   # Use with the CupertinoIcons class for iOS style icons.
@@ -38,7 +40,6 @@ dependencies:
 dev_dependencies:
   flutter_test:
     sdk: flutter
-  firebase_core: 3.10.0
 
   # The "flutter_lints" package below contains a set of recommended lints to
   # encourage good coding practices. The lint set provided by the package is
