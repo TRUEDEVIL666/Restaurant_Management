@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'firebase_options.dart';
 import 'models/Waitstaff.dart';
-import 'firestore/WaitstaffFirestore.dart';
+import 'controllers/WaitstaffController.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -30,7 +30,8 @@ class _LoginState extends State<Login> {
   Future<void> _handleLogin(BuildContext context) async {
     setState(() {
       _isLoading = true;
-      _message = 'Successfully logged in'; // Clear any previous error message
+      _message = 'Successfully logged in';
+      FocusScope.of(context).requestFocus(FocusNode());
     });
 
     final name = _usernameController.text;
@@ -75,15 +76,15 @@ class _LoginState extends State<Login> {
   Widget build(BuildContext context) {
     return SafeArea(
         child: Scaffold(
-      body: Container(
-        decoration: BoxDecoration(
-          image: DecorationImage(
-            image: AssetImage(
-                'lib/assets/images/backgrounds/login_background.jpg'),
+      resizeToAvoidBottomInset: false,
+      body: Stack(children: [
+        Positioned.fill(
+          child: Image.asset(
+            'lib/assets/images/backgrounds/login_background.jpg',
             fit: BoxFit.cover,
           ),
         ),
-        child: Center(
+        Center(
           child: SizedBox(
             width: MediaQuery.of(context).size.width * 0.8,
             child: Column(
@@ -103,8 +104,17 @@ class _LoginState extends State<Login> {
                   controller: _usernameController,
                   decoration: InputDecoration(
                     labelText: 'Username',
+                    labelStyle: TextStyle(
+                      fontWeight: FontWeight.bold,
+                    ),
+                    floatingLabelStyle: TextStyle(
+                      color: Colors.black,
+                      fontWeight: FontWeight.bold,
+                    ),
                     hintText: 'asd',
                     hintStyle: TextStyle(color: Colors.grey),
+                    filled: true,
+                    fillColor: Color.fromRGBO(255, 255, 255, 0.5),
                     contentPadding: EdgeInsets.only(
                       left: 10,
                     ),
@@ -119,8 +129,17 @@ class _LoginState extends State<Login> {
                   obscureText: true,
                   decoration: InputDecoration(
                     labelText: 'Password',
+                    labelStyle: TextStyle(
+                      fontWeight: FontWeight.bold,
+                    ),
+                    floatingLabelStyle: TextStyle(
+                      color: Colors.black,
+                      fontWeight: FontWeight.bold,
+                    ),
                     hintText: '123',
                     hintStyle: TextStyle(color: Colors.grey),
+                    filled: true,
+                    fillColor: Color.fromRGBO(255, 255, 255, 0.5),
                     contentPadding: EdgeInsets.only(
                       left: 10,
                     ),
@@ -207,7 +226,7 @@ class _LoginState extends State<Login> {
             ),
           ),
         ),
-      ),
+      ]),
     ));
   }
 }
