@@ -64,12 +64,12 @@ class _Food_MenuState extends State<Food_Menu> {
                         itemBuilder: (context, index) {
                           Dish dish = menu[index];
                           return FutureBuilder<String>(
-                            future: _storageService.getImage(dish.imgPath),
+                            future: _storageService.getImage(dish.getImgPath),
                             builder: (context, snapshot) {
                               if (snapshot.connectionState ==
                                   ConnectionState.waiting) {
                                 return ListTile(
-                                  title: Text(dish.dishName),
+                                  title: Text(dish.getDishName),
                                   subtitle: Text('Loading image...'),
                                   leading: CircularProgressIndicator(),
                                 );
@@ -77,7 +77,7 @@ class _Food_MenuState extends State<Food_Menu> {
 
                               if (snapshot.hasError) {
                                 return ListTile(
-                                  title: Text(dish.dishName),
+                                  title: Text(dish.getDishName),
                                   subtitle: Text('Error loading image'),
                                   leading: Icon(Icons.error),
                                 );
@@ -85,7 +85,7 @@ class _Food_MenuState extends State<Food_Menu> {
 
                               return Padding(
                                 padding: const EdgeInsets.only(
-                                  bottom: 28.0,
+                                  top: 28.0,
                                 ),
                                 child: Card(
                                   elevation: 4,
@@ -116,7 +116,7 @@ class _Food_MenuState extends State<Food_Menu> {
                                         child: Row(
                                           children: [
                                             Text(
-                                              dish.dishName,
+                                              dish.getDishName,
                                               style: TextStyle(
                                                 fontSize: 26,
                                                 fontWeight: FontWeight.bold,
@@ -124,7 +124,7 @@ class _Food_MenuState extends State<Food_Menu> {
                                             ),
                                             Spacer(),
                                             Text(
-                                              '\$ ${dish.price.toStringAsFixed(2)}',
+                                              '\$ ${dish.getPrice.toStringAsFixed(2)}',
                                               style: TextStyle(
                                                 fontSize: 24,
                                                 fontWeight: FontWeight.w600,
@@ -137,24 +137,6 @@ class _Food_MenuState extends State<Food_Menu> {
                                   ),
                                 ),
                               );
-
-                              // return ListTile(
-                              //   leading: CircleAvatar(
-                              //     backgroundImage: NetworkImage(snapshot.data!),
-                              //   ),
-                              //   title: Text(
-                              //     dish.dishName,
-                              //     style: TextStyle(
-                              //       fontWeight: FontWeight.bold,
-                              //     ),
-                              //   ),
-                              //   subtitle: Text(
-                              //     '\$${dish.price}',
-                              //     style: TextStyle(
-                              //       fontWeight: FontWeight.bold,
-                              //     ),
-                              //   ),
-                              // );
                             },
                           );
                         },

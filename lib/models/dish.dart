@@ -1,8 +1,8 @@
 class Dish {
   final String? _id;
-  final String _dishName, _imgPath;
-  final List<String> _ingredients;
-  final double _price;
+  String _dishName, _imgPath;
+  List<String> _ingredients;
+  double _price;
 
   Dish({
     String? id,
@@ -44,13 +44,31 @@ class Dish {
     };
   }
 
-  String get dishName => _dishName;
+  set setDishName(String value) {
+    _dishName = value;
+  }
 
-  String get imgPath => _imgPath;
+  set setImgPath(value) {
+    _imgPath = value;
+  }
 
-  List<String> get ingredients => _ingredients;
+  set setIngredients(List<String> value) {
+    _ingredients = value;
+  }
 
-  double get price => _price;
+  set setPrice(double value) {
+    _price = value;
+  }
+
+  String? get getId => _id;
+
+  String get getDishName => _dishName;
+
+  String get getImgPath => _imgPath;
+
+  List<String> get getIngredients => _ingredients;
+
+  double get getPrice => _price;
 
   @override
   String toString() {
