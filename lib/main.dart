@@ -26,10 +26,6 @@ class _Food_MenuState extends State<Food_Menu> {
   final DishController _dishController = DishController();
   final FirebaseStorageService _storageService = FirebaseStorageService();
   List<Dish> menu = [];
-  TextStyle defaultStyle = TextStyle(
-    color: Colors.white,
-    fontWeight: FontWeight.bold,
-  );
 
   @override
   void initState() {
@@ -57,57 +53,112 @@ class _Food_MenuState extends State<Food_Menu> {
                 fit: BoxFit.fill,
               ),
             ),
-            Transform.scale(
-              scale: 1.5,
-              child: Center(
-                child: Container(
-                  width: 300,
-                  height: 600,
-                  child: menu.isEmpty
-                      ? Center(child: CircularProgressIndicator())
-                      : ListView.builder(
-                          itemCount: menu.length,
-                          itemBuilder: (context, index) {
-                            Dish dish = menu[index];
-                            return FutureBuilder<String>(
-                              future: _storageService.getImage(dish.imgPath),
-                              builder: (context, snapshot) {
-                                if (snapshot.connectionState ==
-                                    ConnectionState.waiting) {
-                                  return ListTile(
-                                    title: Text(dish.dishName),
-                                    subtitle: Text('Loading image...'),
-                                    leading:
-                                        CircularProgressIndicator(),
-                                  );
-                                }
-              
-                                if (snapshot.hasError) {
-                                  return ListTile(
-                                    title: Text(dish.dishName),
-                                    subtitle: Text('Error loading image'),
-                                    leading: Icon(Icons.error),
-                                  );
-                                }
-              
+            Center(
+              child: SizedBox(
+                width: 400,
+                height: 880,
+                child: menu.isEmpty
+                    ? Center(child: CircularProgressIndicator())
+                    : ListView.builder(
+                        itemCount: menu.length,
+                        itemBuilder: (context, index) {
+                          Dish dish = menu[index];
+                          return FutureBuilder<String>(
+                            future: _storageService.getImage(dish.imgPath),
+                            builder: (context, snapshot) {
+                              if (snapshot.connectionState ==
+                                  ConnectionState.waiting) {
                                 return ListTile(
-                                  leading: CircleAvatar(
-                                    backgroundImage: NetworkImage(snapshot.data!),
-                                  ),
-                                  title: Text(
-                                    dish.dishName,
-                                    style: defaultStyle,
-                                  ),
-                                  subtitle: Text(
-                                    '\$${dish.price}',
-                                    style: defaultStyle,
-                                  ),
+                                  title: Text(dish.dishName),
+                                  subtitle: Text('Loading image...'),
+                                  leading: CircularProgressIndicator(),
                                 );
-                              },
-                            );
-                          },
-                        ),
-                ),
+                              }
+
+                              if (snapshot.hasError) {
+                                return ListTile(
+                                  title: Text(dish.dishName),
+                                  subtitle: Text('Error loading image'),
+                                  leading: Icon(Icons.error),
+                                );
+                              }
+
+                              return Padding(
+                                padding: const EdgeInsets.only(
+                                  bottom: 28.0,
+                                ),
+                                child: Card(
+                                  elevation: 4,
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(14),
+                                  ),
+                                  child: Column(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    children: [
+                                      ClipRRect(
+                                        borderRadius: BorderRadius.only(
+                                          topLeft: Radius.circular(14),
+                                          topRight: Radius.circular(14),
+                                        ),
+                                        child: Image(
+                                          width: double.infinity,
+                                          height: 150,
+                                          image: NetworkImage(snapshot.data!),
+                                          fit: BoxFit.cover,
+                                        ),
+                                      ),
+                                      Padding(
+                                        padding: const EdgeInsets.symmetric(
+                                          vertical: 8,
+                                          horizontal: 20,
+                                        ),
+                                        child: Row(
+                                          children: [
+                                            Text(
+                                              dish.dishName,
+                                              style: TextStyle(
+                                                fontSize: 26,
+                                                fontWeight: FontWeight.bold,
+                                              ),
+                                            ),
+                                            Spacer(),
+                                            Text(
+                                              '\$ ${dish.price.toStringAsFixed(2)}',
+                                              style: TextStyle(
+                                                fontSize: 24,
+                                                fontWeight: FontWeight.w600,
+                                              ),
+                                            ),
+                                          ],
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              );
+
+                              // return ListTile(
+                              //   leading: CircleAvatar(
+                              //     backgroundImage: NetworkImage(snapshot.data!),
+                              //   ),
+                              //   title: Text(
+                              //     dish.dishName,
+                              //     style: TextStyle(
+                              //       fontWeight: FontWeight.bold,
+                              //     ),
+                              //   ),
+                              //   subtitle: Text(
+                              //     '\$${dish.price}',
+                              //     style: TextStyle(
+                              //       fontWeight: FontWeight.bold,
+                              //     ),
+                              //   ),
+                              // );
+                            },
+                          );
+                        },
+                      ),
               ),
             ),
           ],
