@@ -7,7 +7,7 @@ class FirebaseStorageService {
 
   static final _instance = FirebaseStorageService._internal();
   factory FirebaseStorageService() => _instance;
-
+  
   Future<String> getImage(String imgPath) async {
     return await _firebaseStorage.child(imgPath).getDownloadURL();
   }

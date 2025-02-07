@@ -3,6 +3,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:restaurant_management/controllers/user_controller.dart';
 import 'package:restaurant_management/firebase_options.dart';
+import 'package:restaurant_management/layouts/menu_management.dart';
 
 import '../models/user.dart';
 
@@ -41,9 +42,13 @@ class _Login_ScreenState extends State<Login_Screen> {
       _passwordController.text.trim(),
     );
 
-    String msg = 'Successfully logged in';
-    if (user == null) {
-      msg = 'Incorrect username or password';
+    String msg = 'Incorrect username or password';
+    if (user != null) {
+      msg = 'Successfully logged in';
+      Navigator.push(
+        context,
+        MaterialPageRoute(builder: (context) => Menu_Management_Screen()),
+      );
     }
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
