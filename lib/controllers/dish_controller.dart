@@ -26,7 +26,6 @@ class DishController {
   Future<Dish> getDish(String id) async {
     try {
       DocumentSnapshot doc = await _db.doc(id).get();
-
       return Dish.fromFirestore(doc.id, doc.data() as Map<String, dynamic>);
     } catch (e) {
       print('ERROR FETCHING DISH: $e');

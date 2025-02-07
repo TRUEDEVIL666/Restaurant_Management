@@ -1,7 +1,10 @@
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:restaurant_management/controllers/user_controller.dart';
 import 'package:restaurant_management/firebase_options.dart';
+
+import '../models/user.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -23,7 +26,39 @@ class _Login_ScreenState extends State<Login_Screen> {
   TextEditingController _usernameController = TextEditingController(),
       _passwordController = TextEditingController();
 
-  void _login() {}
+  bool _isChecking = false;
+
+  final UserController _userController = UserController();
+
+  void _login(BuildContext context) async {
+    setState(() {
+      _isChecking = true;
+      FocusScope.of(context).unfocus();
+    });
+
+    User? user = await _userController.findUser(
+      _usernameController.text.trim(),
+      _passwordController.text.trim(),
+    );
+
+    String msg = 'Successfully logged in';
+    if (user == null) {
+      msg = 'Incorrect username or password';
+    }
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Center(
+          child: Text(msg),
+        ),
+        duration: Duration(seconds: 1),
+        behavior: SnackBarBehavior.floating,
+      ),
+    );
+
+    setState(() {
+      _isChecking = false;
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -70,6 +105,7 @@ class _Login_ScreenState extends State<Login_Screen> {
                   ),
                   TextField(
                     controller: _passwordController,
+                    keyboardType: TextInputType.text,
                     obscureText: true,
                     decoration: InputDecoration(
                       labelText: 'Password',
@@ -80,16 +116,18 @@ class _Login_ScreenState extends State<Login_Screen> {
                   SizedBox(
                     height: 80,
                   ),
-                  ElevatedButton(
-                    onPressed: _login,
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: Color.fromRGBO(78, 123, 234, 0.8),
-                    ),
-                    child: Text(
-                      'SIGN IN',
-                      style: TextStyle(color: Colors.white),
-                    ),
-                  ),
+                  _isChecking
+                      ? CircularProgressIndicator()
+                      : ElevatedButton(
+                          onPressed: () => _login(context),
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: Color.fromRGBO(78, 123, 234, 0.8),
+                          ),
+                          child: Text(
+                            'SIGN IN',
+                            style: TextStyle(color: Colors.white),
+                          ),
+                        ),
                 ],
               ),
             ),
