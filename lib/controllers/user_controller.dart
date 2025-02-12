@@ -1,56 +1,37 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
-
 import '../models/user.dart';
+import 'template_controller.dart';
 
-class UserController{
-  UserController._internal();
+class UserController extends Controller<User> {
+  UserController._internal() {
+    db = FirebaseFirestore.instance.collection('users');
+  }
 
   static final _instance = UserController._internal();
   factory UserController() => _instance;
 
-  static final CollectionReference _db = FirebaseFirestore.instance.collection('users');
+  @override
+  User fromFirestore(String id, Map<String, dynamic> data) {
+    return User.fromFirestore(id, data);
+  }
 
   Future<User?> findUser(String username, String password) async {
     try {
-      QuerySnapshot querySnapshot = await _db
+      QuerySnapshot querySnapshot = await db
           .where('username', isEqualTo: username)
           .where('password', isEqualTo: password)
           .get();
 
       if (querySnapshot.docs.isNotEmpty) {
         QueryDocumentSnapshot doc = querySnapshot.docs.first;
-        User user = User.fromFirestore(doc.id, doc.data() as Map<String, dynamic>);
-        return user;
+        return fromFirestore(doc.id, doc.data() as Map<String, dynamic>);
       }
 
       print('USER NOT FOUND');
       return null;
     } catch (e) {
-      print('ERROR FINDING USER');
+      print('ERROR FINDING USER: $e');
       return null;
-    }
-  }
-
-  Future<List<User>> getUsers() async {
-    try {
-      QuerySnapshot querySnapshot = await _db.get();
-
-      return querySnapshot.docs.map((doc) {
-        return User.fromFirestore(doc.id, doc.data() as Map<String, dynamic>);
-      }).toList();
-    } catch (e) {
-      print('ERROR FETCHING USERS: $e');
-      return [];
-    }
-  }
-
-  Future<User> getUser(String id) async {
-    try {
-      DocumentSnapshot doc = await _db.doc(id).get();
-      return User.fromFirestore(doc.id, doc.data() as Map<String, dynamic>);
-    } catch (e) {
-      print('ERROR FETCHING USER: $e');
-      return User.emptyUser();
     }
   }
 }

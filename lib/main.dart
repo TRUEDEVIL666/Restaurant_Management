@@ -35,7 +35,7 @@ class _FoodMenuScreenState extends State<FoodMenuScreen> {
   }
 
   void _loadMenu() async {
-    List<Dish> tempMenu = await _dishController.getMenu();
+    List<Dish> tempMenu = await _dishController.getItems();
     setState(() {
       menu = tempMenu;
     });
