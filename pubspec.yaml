@@ -66,6 +66,7 @@ flutter:
     - lib/assets/images/backgrounds/login_background.jpg
     - lib/assets/images/backgrounds/food_menu_background.jpg
     - lib/assets/images/backgrounds/monkey.jpg
+    - lib/assets/images/backgrounds/default_food_image.png
 
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/to/resolution-aware-images

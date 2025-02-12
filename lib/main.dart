@@ -12,17 +12,17 @@ void main() async {
     options: DefaultFirebaseOptions.currentPlatform,
   );
   runApp(MaterialApp(
-    home: Food_Menu(),
+    home: FoodMenuScreen(),
     debugShowCheckedModeBanner: false,
   ));
 }
 
-class Food_Menu extends StatefulWidget {
+class FoodMenuScreen extends StatefulWidget {
   @override
-  State<Food_Menu> createState() => _Food_MenuState();
+  State<FoodMenuScreen> createState() => _FoodMenuScreenState();
 }
 
-class _Food_MenuState extends State<Food_Menu> {
+class _FoodMenuScreenState extends State<FoodMenuScreen> {
   final DishController _dishController = DishController();
   final FirebaseStorageService _storageService = FirebaseStorageService();
   int _selectedIndex = 1;
@@ -61,94 +61,130 @@ class _Food_MenuState extends State<Food_Menu> {
               ),
             ),
             Center(
-              child: Flexible(
-                child: menu.isEmpty
-                    ? Center(child: CircularProgressIndicator())
-                    : ListView.builder(
-                        itemCount: menu.length,
-                        itemBuilder: (context, index) {
-                          Dish dish = menu[index];
-                          return FutureBuilder<String>(
-                            future: _storageService.getImage(dish.getImgPath),
-                            builder: (context, snapshot) {
-                              if (snapshot.connectionState ==
-                                  ConnectionState.waiting) {
-                                return ListTile(
-                                  title: Text(dish.getDishName),
-                                  subtitle: Text('Loading image...'),
-                                  leading: CircularProgressIndicator(),
-                                );
-                              }
-
-                              if (snapshot.hasError) {
-                                return ListTile(
-                                  title: Text(dish.getDishName),
-                                  subtitle: Text('Error loading image'),
-                                  leading: Icon(Icons.error),
-                                );
-                              }
-
-                              return Flexible(
-                                child: Padding(
-                                  padding: const EdgeInsets.only(
-                                    top: 28.0,
+              child: menu.isEmpty
+                  ? Center(child: CircularProgressIndicator())
+                  : ListView.builder(
+                      itemCount: menu.length,
+                      itemBuilder: (context, index) {
+                        Dish dish = menu[index];
+                        return FutureBuilder<String>(
+                          future: _storageService.getImage(dish.imgPath),
+                          builder: (context, snapshot) {
+                            if (snapshot.connectionState ==
+                                ConnectionState.waiting || snapshot.hasError) {
+                              return Padding(
+                                padding: const EdgeInsets.only(
+                                  top: 24.0,
+                                ),
+                                child: Card(
+                                  elevation: 4,
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(14),
                                   ),
-                                  child: Card(
-                                    elevation: 4,
-                                    shape: RoundedRectangleBorder(
-                                      borderRadius: BorderRadius.circular(14),
-                                    ),
-                                    child: Column(
-                                      crossAxisAlignment:
-                                          CrossAxisAlignment.start,
-                                      children: [
-                                        ClipRRect(
-                                          borderRadius: BorderRadius.only(
-                                            topLeft: Radius.circular(14),
-                                            topRight: Radius.circular(14),
-                                          ),
-                                          child: Image(
-                                            width: double.infinity,
-                                            height: 150,
-                                            image: NetworkImage(snapshot.data!),
-                                            fit: BoxFit.cover,
-                                          ),
+                                  child: Column(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    children: [
+                                      ClipRRect(
+                                        borderRadius: BorderRadius.only(
+                                          topLeft: Radius.circular(14),
+                                          topRight: Radius.circular(14),
                                         ),
-                                        Padding(
-                                          padding: const EdgeInsets.symmetric(
-                                            vertical: 8,
-                                            horizontal: 20,
-                                          ),
-                                          child: Row(
-                                            children: [
-                                              Text(
-                                                dish.getDishName,
-                                                style: TextStyle(
-                                                  fontSize: 26,
-                                                  fontWeight: FontWeight.bold,
-                                                ),
-                                              ),
-                                              Spacer(),
-                                              Text(
-                                                '\$ ${dish.getPrice.toStringAsFixed(2)}',
-                                                style: TextStyle(
-                                                  fontSize: 24,
-                                                  fontWeight: FontWeight.w600,
-                                                ),
-                                              ),
-                                            ],
-                                          ),
+                                        child: Image.asset(
+                                          'lib/assets/images/backgrounds/default_food_image.png',
+                                          width: double.infinity,
+                                          height: 150,
+                                          fit: BoxFit.cover,
                                         ),
-                                      ],
-                                    ),
+                                      ),
+                                      Padding(
+                                        padding: const EdgeInsets.symmetric(
+                                          vertical: 8,
+                                          horizontal: 20,
+                                        ),
+                                        child: Row(
+                                          children: [
+                                            Text(
+                                              dish.dishName,
+                                              style: TextStyle(
+                                                fontSize: 26,
+                                                fontWeight: FontWeight.bold,
+                                              ),
+                                            ),
+                                            Spacer(),
+                                            Text(
+                                              '\$ ${dish.price.toStringAsFixed(2)}',
+                                              style: TextStyle(
+                                                fontSize: 24,
+                                                fontWeight: FontWeight.w600,
+                                              ),
+                                            ),
+                                          ],
+                                        ),
+                                      ),
+                                    ],
                                   ),
                                 ),
                               );
-                            },
-                          );
-                        },
-                      ),
-              ),
+                            }
+
+                            return Padding(
+                              padding: const EdgeInsets.only(
+                                top: 24.0,
+                              ),
+                              child: Card(
+                                elevation: 4,
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(14),
+                                ),
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    ClipRRect(
+                                      borderRadius: BorderRadius.only(
+                                        topLeft: Radius.circular(14),
+                                        topRight: Radius.circular(14),
+                                      ),
+                                      child: Image(
+                                        width: double.infinity,
+                                        height: 150,
+                                        image: NetworkImage(snapshot.data!),
+                                        fit: BoxFit.cover,
+                                      ),
+                                    ),
+                                    Padding(
+                                      padding: const EdgeInsets.symmetric(
+                                        vertical: 8,
+                                        horizontal: 20,
+                                      ),
+                                      child: Row(
+                                        children: [
+                                          Text(
+                                            dish.dishName,
+                                            style: TextStyle(
+                                              fontSize: 26,
+                                              fontWeight: FontWeight.bold,
+                                            ),
+                                          ),
+                                          Spacer(),
+                                          Text(
+                                            '\$ ${dish.price.toStringAsFixed(2)}',
+                                            style: TextStyle(
+                                              fontSize: 24,
+                                              fontWeight: FontWeight.w600,
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            );
+                          },
+                        );
+                      },
+                    ),
             ),
           ],
         ),

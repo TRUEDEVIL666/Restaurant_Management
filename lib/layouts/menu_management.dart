@@ -3,7 +3,9 @@ import 'dart:io';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:restaurant_management/controllers/dish_controller.dart';
 import 'package:restaurant_management/firebase_options.dart';
+import 'package:restaurant_management/models/dish.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -11,17 +13,18 @@ void main() async {
     options: DefaultFirebaseOptions.currentPlatform,
   );
   runApp(MaterialApp(
-    home: Menu_Management_Screen(),
+    home: MenuManagementScreen(),
     debugShowCheckedModeBanner: false,
   ));
 }
 
-class Menu_Management_Screen extends StatefulWidget {
+class MenuManagementScreen extends StatefulWidget {
   @override
-  State<Menu_Management_Screen> createState() => _Menu_Management_ScreenState();
+  State<MenuManagementScreen> createState() => _MenuManagementScreenState();
 }
 
-class _Menu_Management_ScreenState extends State<Menu_Management_Screen> {
+class _MenuManagementScreenState extends State<MenuManagementScreen> {
+  final DishController _dishController = DishController();
   File? _image;
 
   Future<void> _pickImageFromGallery() async {
@@ -29,13 +32,29 @@ class _Menu_Management_ScreenState extends State<Menu_Management_Screen> {
         await ImagePicker().pickImage(source: ImageSource.gallery);
 
     if (pickedFile != null) {
-      setState(() {
-        _image = File(pickedFile.path);
-      });
+      _image = File(pickedFile.path);
     }
   }
 
   void _showInputDialog(BuildContext context) {
+    TextEditingController dishName = TextEditingController(),
+        dishIngredients = TextEditingController(),
+        dishCategory = TextEditingController(),
+        dishSubcategories = TextEditingController(),
+        dishPrice = TextEditingController(),
+        dishDiscount = TextEditingController();
+
+    final List<TextEditingController> controllerList = [
+      dishName,
+      dishIngredients,
+      dishCategory,
+      dishSubcategories,
+      dishPrice,
+      dishDiscount,
+    ];
+
+    bool isFilled = true;
+
     showDialog(
       context: context,
       builder: (BuildContext context) {
@@ -43,56 +62,64 @@ class _Menu_Management_ScreenState extends State<Menu_Management_Screen> {
           builder: (context, setState) {
             return AlertDialog(
               title: Text('Creating a dish'),
-              content: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  TextField(
-                    decoration: InputDecoration(
-                      labelText: 'Dish name',
+              content: SingleChildScrollView(
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    TextField(
+                      controller: dishName,
+                      decoration: InputDecoration(
+                        labelText: 'Dish name',
+                      ),
                     ),
-                  ),
-                  TextField(
-                    decoration: InputDecoration(
-                      labelText: 'Ingredients',
+                    TextField(
+                      controller: dishIngredients,
+                      decoration: InputDecoration(
+                        labelText: 'Ingredients',
+                      ),
                     ),
-                  ),
-                  TextField(
-                    decoration: InputDecoration(
-                      labelText: 'Category',
+                    TextField(
+                      controller: dishCategory,
+                      decoration: InputDecoration(
+                        labelText: 'Category',
+                      ),
                     ),
-                  ),
-                  TextField(
-                    decoration: InputDecoration(
-                      labelText: 'Sub-categories',
+                    TextField(
+                      controller: dishSubcategories,
+                      decoration: InputDecoration(
+                        labelText: 'Sub-categories',
+                      ),
                     ),
-                  ),
-                  TextField(
-                    keyboardType: TextInputType.number,
-                    decoration: InputDecoration(
-                      labelText: 'Price',
+                    TextField(
+                      controller: dishPrice,
+                      keyboardType: TextInputType.number,
+                      decoration: InputDecoration(
+                        labelText: 'Price',
+                      ),
                     ),
-                  ),
-                  TextField(
-                    decoration: InputDecoration(
-                      labelText: 'Discount',
+                    TextField(
+                      controller: dishDiscount,
+                      decoration: InputDecoration(
+                        labelText: 'Discount',
+                      ),
                     ),
-                  ),
-                  MaterialButton(
-                    onPressed: () async {
-                      await _pickImageFromGallery();
-                      setState(() {});
-                    },
-                    child: Text('Upload image'),
-                  ),
-                  _image != null
-                      ? Image.file(
-                          _image!,
-                          width: 150,
-                          height: 150,
-                          fit: BoxFit.cover,
-                        )
-                      : Text('No image selected'),
-                ],
+                    MaterialButton(
+                      onPressed: () async {
+                        await _pickImageFromGallery();
+                        setState(() {});
+                      },
+                      child: Text('Upload image'),
+                    ),
+                    _image != null
+                        ? Image.file(
+                            _image!,
+                            width: 150,
+                            height: 150,
+                            fit: BoxFit.cover,
+                          )
+                        : Text('No image selected'),
+                  ],
+                ),
               ),
               actions: <Widget>[
                 TextButton(
@@ -106,8 +133,42 @@ class _Menu_Management_ScreenState extends State<Menu_Management_Screen> {
                 ),
                 TextButton(
                   child: Text('Submit'),
-                  onPressed: () {
-                    Navigator.of(context).pop();
+                  onPressed: () async {
+                    controllerList.forEach(
+                      (controller) {
+                        if (controller.text.isEmpty) {
+                          isFilled = false;
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(
+                              content: Center(
+                                child: Text(
+                                  'Missing input value',
+                                ),
+                              ),
+                            ),
+                          );
+                        }
+                      },
+                    );
+
+                    if (isFilled &&
+                        await _dishController.uploadDish(
+                          _image,
+                          Dish(
+                            dishName: dishName.text,
+                            imgPath: 'menu/${dishName.text}.png',
+                            ingredients: [],
+                            category: dishCategory.text,
+                            subCategories: [],
+                            price: double.parse(dishPrice.text),
+                            discount: double.parse(dishDiscount.text),
+                          ),
+                        )) {
+                      _image = null;
+                      Navigator.of(context).pop();
+                    } else {
+                      isFilled = true;
+                    }
                   },
                 ),
               ],

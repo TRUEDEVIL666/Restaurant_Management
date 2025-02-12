@@ -2,23 +2,25 @@ class Dish {
   final String? _id;
   String _dishName, _imgPath, _category;
   List<String> _ingredients, _subCategories;
-  double _price;
+  double _price, _discount;
 
   Dish({
     String? id,
     required String dishName,
     required String imgPath,
     required List<String> ingredients,
-    required String category,
-    required List<String> subCategories,
+    String? category,
+    List<String>? subCategories,
     required double price,
+    double? discount,
   })  : _id = id,
         _dishName = dishName,
         _imgPath = imgPath,
         _ingredients = ingredients,
-        _category = category,
-        _subCategories = subCategories,
-        _price = price;
+        _category = category ?? '',
+        _subCategories = subCategories ?? [],
+        _price = price,
+        _discount = discount ?? 0;
 
   factory Dish.emptyDish() {
     return Dish(
@@ -28,6 +30,7 @@ class Dish {
       category: '',
       subCategories: [],
       price: 0,
+      discount: 0,
     );
   }
 
@@ -40,6 +43,7 @@ class Dish {
       category: doc['category'],
       subCategories: List<String>.from(doc['subCategories']),
       price: doc['price'].toDouble(),
+      discount: doc['discount'].toDouble(),
     );
   }
 
@@ -51,49 +55,56 @@ class Dish {
       'category': _category,
       'subCategories': _subCategories,
       'price': _price,
+      'discount': _discount,
     };
   }
 
-  set setDishName(String value) {
-    _dishName = value;
-  }
-
-  set setImgPath(value) {
-    _imgPath = value;
-  }
-
-  set setIngredients(List<String> value) {
-    _ingredients = value;
-  }
-
-  set setCategory(String value) {
-    _category = value;
-  }
-
-  set setSubCategories(List<String> value) {
-    _subCategories = value;
-  }
-
-  set setPrice(double value) {
-    _price = value;
-  }
-
-  String? get getId => _id;
-
-  String get getDishName => _dishName;
-
-  String get getImgPath => _imgPath;
-
-  List<String> get getIngredients => _ingredients;
-
-  String get getCategory => _category;
-
-  List<String> get getSubCategories => _subCategories;
-
-  double get getPrice => _price;
+  String? get id => _id;
 
   @override
   String toString() {
     return '$_dishName costs $_price';
+  }
+
+  String get dishName => _dishName;
+
+  set dishName(String value) {
+    _dishName = value;
+  }
+
+  get imgPath => _imgPath;
+
+  set imgPath(value) {
+    _imgPath = value;
+  }
+
+  get category => _category;
+
+  set category(value) {
+    _category = value;
+  }
+
+  List<String> get ingredients => _ingredients;
+
+  set ingredients(List<String> value) {
+    _ingredients = value;
+  }
+
+  get subCategories => _subCategories;
+
+  set subCategories(value) {
+    _subCategories = value;
+  }
+
+  double get price => _price;
+
+  set price(double value) {
+    _price = value;
+  }
+
+  get discount => _discount;
+
+  set discount(value) {
+    _discount = value;
   }
 }
