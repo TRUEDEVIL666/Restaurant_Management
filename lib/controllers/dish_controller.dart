@@ -16,8 +16,8 @@ class DishController extends Controller<Dish> {
   final FirebaseStorageService _storageService = FirebaseStorageService();
 
   @override
-  Dish fromFirestore(String id, Map<String, dynamic> data) =>
-      Dish.fromFirestore(id, data);
+  Dish toObject(String id, Map<String, dynamic> data) =>
+      Dish.toObject(id, data);
 
   Future<bool> uploadDish(File? image, Dish dish) async {
     try {

@@ -22,19 +22,7 @@ class Dish {
         _price = price,
         _discount = discount ?? 0;
 
-  factory Dish.emptyDish() {
-    return Dish(
-      dishName: '',
-      imgPath: '',
-      ingredients: [],
-      category: '',
-      subCategories: [],
-      price: 0,
-      discount: 0,
-    );
-  }
-
-  factory Dish.fromFirestore(String docId, Map<String, dynamic> doc) {
+  factory Dish.toObject(String docId, Map<String, dynamic> doc) {
     return Dish(
       id: docId,
       dishName: doc['dishName'],

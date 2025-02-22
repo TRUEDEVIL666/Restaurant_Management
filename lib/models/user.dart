@@ -17,14 +17,6 @@ class User {
         _phoneNumber = phoneNumber,
         _loginHistory = loginHistory;
 
-  factory User.emptyUser() {
-    return User(
-      username: '',
-      password: '',
-      phoneNumber: '',
-    );
-  }
-
   factory User.fromFirestore(String docId, Map<String, dynamic> doc) {
     return User(
       id: docId,

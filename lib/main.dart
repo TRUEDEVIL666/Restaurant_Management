@@ -73,8 +73,9 @@ class _FoodMenuScreenState extends State<FoodMenuScreen> {
                             if (snapshot.connectionState ==
                                 ConnectionState.waiting || snapshot.hasError) {
                               return Padding(
-                                padding: const EdgeInsets.only(
-                                  top: 24.0,
+                                padding: const EdgeInsets.symmetric(
+                                  vertical: 4,
+                                  horizontal: 14,
                                 ),
                                 child: Card(
                                   elevation: 4,
@@ -129,8 +130,9 @@ class _FoodMenuScreenState extends State<FoodMenuScreen> {
                             }
 
                             return Padding(
-                              padding: const EdgeInsets.only(
-                                top: 24.0,
+                              padding: const EdgeInsets.symmetric(
+                                vertical: 4,
+                                horizontal: 14,
                               ),
                               child: Card(
                                 elevation: 4,

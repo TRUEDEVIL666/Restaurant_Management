@@ -11,7 +11,7 @@ class UserController extends Controller<User> {
   factory UserController() => _instance;
 
   @override
-  User fromFirestore(String id, Map<String, dynamic> data) {
+  User toObject(String id, Map<String, dynamic> data) {
     return User.fromFirestore(id, data);
   }
 
@@ -24,7 +24,7 @@ class UserController extends Controller<User> {
 
       if (querySnapshot.docs.isNotEmpty) {
         QueryDocumentSnapshot doc = querySnapshot.docs.first;
-        return fromFirestore(doc.id, doc.data() as Map<String, dynamic>);
+        return toObject(doc.id, doc.data() as Map<String, dynamic>);
       }
 
       print('USER NOT FOUND');
