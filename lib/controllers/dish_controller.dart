@@ -1,36 +1,32 @@
+import 'dart:io';
+
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:restaurant_management/controllers/template_controller.dart';
+import 'package:restaurant_management/services/firebase_storage_service.dart';
 import '../models/dish.dart';
 
-class DishController {
-  DishController._internal();
+class DishController extends Controller<Dish> {
+  DishController._internal() {
+    db = FirebaseFirestore.instance.collection('menu');
+  }
 
   static final _instance = DishController._internal();
   factory DishController() => _instance;
 
-  static final CollectionReference _db =
-      FirebaseFirestore.instance.collection('menu');
+  final FirebaseStorageService _storageService = FirebaseStorageService();
 
-  Future<List<Dish>> getMenu() async {
+  @override
+  Dish toObject(String id, Map<String, dynamic> data) =>
+      Dish.toObject(id, data);
+
+  Future<bool> uploadDish(File? image, Dish dish) async {
     try {
-      QuerySnapshot querySnapshot = await _db.get();
-
-      return querySnapshot.docs.map((doc) {
-        return Dish.fromFirestore(doc.id, doc.data() as Map<String, dynamic>);
-      }).toList();
+      await _storageService.uploadImage(image, dish.imgPath);
+      await db.add(dish.toFirestore());
+      return true;
     } catch (e) {
-      print('ERROR FETCHING MENU: $e');
-      return [];
-    }
-  }
-
-  Future<Dish> getDish(String id) async {
-    try {
-      DocumentSnapshot doc = await _db.doc(id).get();
-
-      return Dish.fromFirestore(doc.id, doc.data() as Map<String, dynamic>);
-    } catch (e) {
-      print('ERROR FETCHING DISH: $e');
-      return Dish.emptyDish();
+      print('ERROR UPLOADING DISH: $e');
+      return false;
     }
   }
 }

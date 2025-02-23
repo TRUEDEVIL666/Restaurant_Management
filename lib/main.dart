@@ -12,24 +12,21 @@ void main() async {
     options: DefaultFirebaseOptions.currentPlatform,
   );
   runApp(MaterialApp(
-    home: Food_Menu(),
+    home: FoodMenuScreen(),
     debugShowCheckedModeBanner: false,
   ));
 }
 
-class Food_Menu extends StatefulWidget {
+class FoodMenuScreen extends StatefulWidget {
   @override
-  State<Food_Menu> createState() => _Food_MenuState();
+  State<FoodMenuScreen> createState() => _FoodMenuScreenState();
 }
 
-class _Food_MenuState extends State<Food_Menu> {
+class _FoodMenuScreenState extends State<FoodMenuScreen> {
   final DishController _dishController = DishController();
   final FirebaseStorageService _storageService = FirebaseStorageService();
+  int _selectedIndex = 1;
   List<Dish> menu = [];
-  TextStyle defaultStyle = TextStyle(
-    color: Colors.white,
-    fontWeight: FontWeight.bold,
-  );
 
   @override
   void initState() {
@@ -38,9 +35,15 @@ class _Food_MenuState extends State<Food_Menu> {
   }
 
   void _loadMenu() async {
-    List<Dish> tempMenu = await _dishController.getMenu();
+    List<Dish> tempMenu = await _dishController.getItems();
     setState(() {
       menu = tempMenu;
+    });
+  }
+
+  void _onItemTapped(int index) {
+    setState(() {
+      _selectedIndex = index;
     });
   }
 
@@ -57,58 +60,151 @@ class _Food_MenuState extends State<Food_Menu> {
                 fit: BoxFit.fill,
               ),
             ),
-            Transform.scale(
-              scale: 1.5,
-              child: Center(
-                child: Container(
-                  width: 300,
-                  height: 600,
-                  child: menu.isEmpty
-                      ? Center(child: CircularProgressIndicator())
-                      : ListView.builder(
-                          itemCount: menu.length,
-                          itemBuilder: (context, index) {
-                            Dish dish = menu[index];
-                            return FutureBuilder<String>(
-                              future: _storageService.getImage(dish.imgPath),
-                              builder: (context, snapshot) {
-                                if (snapshot.connectionState ==
-                                    ConnectionState.waiting) {
-                                  return ListTile(
-                                    title: Text(dish.dishName),
-                                    subtitle: Text('Loading image...'),
-                                    leading:
-                                        CircularProgressIndicator(),
-                                  );
-                                }
-              
-                                if (snapshot.hasError) {
-                                  return ListTile(
-                                    title: Text(dish.dishName),
-                                    subtitle: Text('Error loading image'),
-                                    leading: Icon(Icons.error),
-                                  );
-                                }
-              
-                                return ListTile(
-                                  leading: CircleAvatar(
-                                    backgroundImage: NetworkImage(snapshot.data!),
+            Center(
+              child: menu.isEmpty
+                  ? Center(child: CircularProgressIndicator())
+                  : ListView.builder(
+                      itemCount: menu.length,
+                      itemBuilder: (context, index) {
+                        Dish dish = menu[index];
+                        return FutureBuilder<String>(
+                          future: _storageService.getImage(dish.imgPath),
+                          builder: (context, snapshot) {
+                            if (snapshot.connectionState ==
+                                ConnectionState.waiting || snapshot.hasError) {
+                              return Padding(
+                                padding: const EdgeInsets.symmetric(
+                                  vertical: 4,
+                                  horizontal: 14,
+                                ),
+                                child: Card(
+                                  elevation: 4,
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(14),
                                   ),
-                                  title: Text(
-                                    dish.dishName,
-                                    style: defaultStyle,
+                                  child: Column(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    children: [
+                                      ClipRRect(
+                                        borderRadius: BorderRadius.only(
+                                          topLeft: Radius.circular(14),
+                                          topRight: Radius.circular(14),
+                                        ),
+                                        child: Image.asset(
+                                          'lib/assets/images/backgrounds/default_food_image.png',
+                                          width: double.infinity,
+                                          height: 150,
+                                          fit: BoxFit.cover,
+                                        ),
+                                      ),
+                                      Padding(
+                                        padding: const EdgeInsets.symmetric(
+                                          vertical: 8,
+                                          horizontal: 20,
+                                        ),
+                                        child: Row(
+                                          children: [
+                                            Text(
+                                              dish.dishName,
+                                              style: TextStyle(
+                                                fontSize: 26,
+                                                fontWeight: FontWeight.bold,
+                                              ),
+                                            ),
+                                            Spacer(),
+                                            Text(
+                                              '\$ ${dish.price.toStringAsFixed(2)}',
+                                              style: TextStyle(
+                                                fontSize: 24,
+                                                fontWeight: FontWeight.w600,
+                                              ),
+                                            ),
+                                          ],
+                                        ),
+                                      ),
+                                    ],
                                   ),
-                                  subtitle: Text(
-                                    '\$${dish.price}',
-                                    style: defaultStyle,
-                                  ),
-                                );
-                              },
+                                ),
+                              );
+                            }
+
+                            return Padding(
+                              padding: const EdgeInsets.symmetric(
+                                vertical: 4,
+                                horizontal: 14,
+                              ),
+                              child: Card(
+                                elevation: 4,
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(14),
+                                ),
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    ClipRRect(
+                                      borderRadius: BorderRadius.only(
+                                        topLeft: Radius.circular(14),
+                                        topRight: Radius.circular(14),
+                                      ),
+                                      child: Image(
+                                        width: double.infinity,
+                                        height: 150,
+                                        image: NetworkImage(snapshot.data!),
+                                        fit: BoxFit.cover,
+                                      ),
+                                    ),
+                                    Padding(
+                                      padding: const EdgeInsets.symmetric(
+                                        vertical: 8,
+                                        horizontal: 20,
+                                      ),
+                                      child: Row(
+                                        children: [
+                                          Text(
+                                            dish.dishName,
+                                            style: TextStyle(
+                                              fontSize: 26,
+                                              fontWeight: FontWeight.bold,
+                                            ),
+                                          ),
+                                          Spacer(),
+                                          Text(
+                                            '\$ ${dish.price.toStringAsFixed(2)}',
+                                            style: TextStyle(
+                                              fontSize: 24,
+                                              fontWeight: FontWeight.w600,
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
                             );
                           },
-                        ),
-                ),
-              ),
+                        );
+                      },
+                    ),
+            ),
+          ],
+        ),
+        bottomNavigationBar: BottomNavigationBar(
+          currentIndex: _selectedIndex,
+          onTap: _onItemTapped,
+          items: [
+            BottomNavigationBarItem(
+              icon: Icon(Icons.food_bank),
+              label: 'Main dish',
+            ),
+            BottomNavigationBarItem(
+              icon: Icon(Icons.emoji_food_beverage),
+              label: 'Drinks',
+            ),
+            BottomNavigationBarItem(
+              icon: Icon(Icons.reorder),
+              label: 'Confirm Order',
             ),
           ],
         ),

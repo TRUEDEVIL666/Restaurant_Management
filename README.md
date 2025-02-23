@@ -1,6 +1,6 @@
 # restaurant_management
 
-Flutter app, Firebase as BE
+A new Flutter project.
 
 ## Getting Started
 
