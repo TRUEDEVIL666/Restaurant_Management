@@ -1,8 +1,8 @@
 import 'dart:io';
 
+import 'package:file_picker/file_picker.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
-import 'package:image_picker/image_picker.dart';
 import 'package:restaurant_management/controllers/dish_controller.dart';
 import 'package:restaurant_management/firebase_options.dart';
 import 'package:restaurant_management/models/dish.dart';
@@ -25,14 +25,26 @@ class MenuManagementScreen extends StatefulWidget {
 
 class _MenuManagementScreenState extends State<MenuManagementScreen> {
   final DishController _dishController = DishController();
-  File? _image;
+  File? _file;
+  bool _isImage = false;
 
   Future<void> _pickImageFromGallery() async {
-    final pickedFile =
-        await ImagePicker().pickImage(source: ImageSource.gallery);
+    final result = await FilePicker.platform.pickFiles();
 
-    if (pickedFile != null) {
-      _image = File(pickedFile.path);
+    if (result != null) {
+      PlatformFile file = result.files.first;
+      String? extension = file.extension?.toLowerCase();
+
+      _isImage =
+          extension != null && ['png', 'jpg', 'jpeg'].contains(extension);
+
+      if (_isImage) {
+        setState(() {
+          _file = File(file.path!);
+        });
+      } else {
+        print("File chosen isn't an image");
+      }
     }
   }
 
@@ -110,9 +122,9 @@ class _MenuManagementScreenState extends State<MenuManagementScreen> {
                       },
                       child: Text('Upload image'),
                     ),
-                    _image != null
+                    _file != null
                         ? Image.file(
-                            _image!,
+                            _file!,
                             width: 150,
                             height: 150,
                             fit: BoxFit.cover,
@@ -126,7 +138,7 @@ class _MenuManagementScreenState extends State<MenuManagementScreen> {
                   child: Text('Cancel'),
                   onPressed: () {
                     setState(() {
-                      _image = null;
+                      _file = null;
                     });
                     Navigator.of(context).pop();
                   },
@@ -153,7 +165,7 @@ class _MenuManagementScreenState extends State<MenuManagementScreen> {
 
                     if (isFilled &&
                         await _dishController.uploadDish(
-                          _image,
+                          _file,
                           Dish(
                             dishName: dishName.text,
                             imgPath: 'menu/${dishName.text}.png',
@@ -164,7 +176,7 @@ class _MenuManagementScreenState extends State<MenuManagementScreen> {
                             discount: double.parse(dishDiscount.text),
                           ),
                         )) {
-                      _image = null;
+                      _file = null;
                       Navigator.of(context).pop();
                     } else {
                       isFilled = true;
