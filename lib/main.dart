@@ -2,19 +2,16 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:restaurant_management/controllers/dish_controller.dart';
 
-import '../firebase_options.dart';
 import '../models/dish.dart';
 import '../services/firebase_storage_service.dart';
+import 'services/firebase_options.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  await Firebase.initializeApp(
-    options: DefaultFirebaseOptions.currentPlatform,
+  await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
+  runApp(
+    MaterialApp(home: FoodMenuScreen(), debugShowCheckedModeBanner: false),
   );
-  runApp(MaterialApp(
-    home: FoodMenuScreen(),
-    debugShowCheckedModeBanner: false,
-  ));
 }
 
 class FoodMenuScreen extends StatefulWidget {
@@ -61,17 +58,76 @@ class _FoodMenuScreenState extends State<FoodMenuScreen> {
               ),
             ),
             Center(
-              child: menu.isEmpty
-                  ? Center(child: CircularProgressIndicator())
-                  : ListView.builder(
-                      itemCount: menu.length,
-                      itemBuilder: (context, index) {
-                        Dish dish = menu[index];
-                        return FutureBuilder<String>(
-                          future: _storageService.getImage(dish.imgPath),
-                          builder: (context, snapshot) {
-                            if (snapshot.connectionState ==
-                                ConnectionState.waiting || snapshot.hasError) {
+              child:
+                  menu.isEmpty
+                      ? Center(child: CircularProgressIndicator())
+                      : ListView.builder(
+                        itemCount: menu.length,
+                        itemBuilder: (context, index) {
+                          Dish dish = menu[index];
+                          return FutureBuilder<String>(
+                            future: _storageService.getImage(dish.imgPath),
+                            builder: (context, snapshot) {
+                              if (snapshot.connectionState ==
+                                      ConnectionState.waiting ||
+                                  snapshot.hasError) {
+                                return Padding(
+                                  padding: const EdgeInsets.symmetric(
+                                    vertical: 4,
+                                    horizontal: 14,
+                                  ),
+                                  child: Card(
+                                    elevation: 4,
+                                    shape: RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(14),
+                                    ),
+                                    child: Column(
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.start,
+                                      children: [
+                                        ClipRRect(
+                                          borderRadius: BorderRadius.only(
+                                            topLeft: Radius.circular(14),
+                                            topRight: Radius.circular(14),
+                                          ),
+                                          child: Image.asset(
+                                            'lib/assets/images/backgrounds/default_food_image.png',
+                                            width: double.infinity,
+                                            height: 150,
+                                            fit: BoxFit.cover,
+                                          ),
+                                        ),
+                                        Padding(
+                                          padding: const EdgeInsets.symmetric(
+                                            vertical: 8,
+                                            horizontal: 20,
+                                          ),
+                                          child: Row(
+                                            children: [
+                                              Text(
+                                                dish.dishName,
+                                                style: TextStyle(
+                                                  fontSize: 26,
+                                                  fontWeight: FontWeight.bold,
+                                                ),
+                                              ),
+                                              Spacer(),
+                                              Text(
+                                                '\$ ${dish.price.toStringAsFixed(2)}',
+                                                style: TextStyle(
+                                                  fontSize: 24,
+                                                  fontWeight: FontWeight.w600,
+                                                ),
+                                              ),
+                                            ],
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                );
+                              }
+
                               return Padding(
                                 padding: const EdgeInsets.symmetric(
                                   vertical: 4,
@@ -91,10 +147,10 @@ class _FoodMenuScreenState extends State<FoodMenuScreen> {
                                           topLeft: Radius.circular(14),
                                           topRight: Radius.circular(14),
                                         ),
-                                        child: Image.asset(
-                                          'lib/assets/images/backgrounds/default_food_image.png',
+                                        child: Image(
                                           width: double.infinity,
                                           height: 150,
+                                          image: NetworkImage(snapshot.data!),
                                           fit: BoxFit.cover,
                                         ),
                                       ),
@@ -127,66 +183,10 @@ class _FoodMenuScreenState extends State<FoodMenuScreen> {
                                   ),
                                 ),
                               );
-                            }
-
-                            return Padding(
-                              padding: const EdgeInsets.symmetric(
-                                vertical: 4,
-                                horizontal: 14,
-                              ),
-                              child: Card(
-                                elevation: 4,
-                                shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(14),
-                                ),
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    ClipRRect(
-                                      borderRadius: BorderRadius.only(
-                                        topLeft: Radius.circular(14),
-                                        topRight: Radius.circular(14),
-                                      ),
-                                      child: Image(
-                                        width: double.infinity,
-                                        height: 150,
-                                        image: NetworkImage(snapshot.data!),
-                                        fit: BoxFit.cover,
-                                      ),
-                                    ),
-                                    Padding(
-                                      padding: const EdgeInsets.symmetric(
-                                        vertical: 8,
-                                        horizontal: 20,
-                                      ),
-                                      child: Row(
-                                        children: [
-                                          Text(
-                                            dish.dishName,
-                                            style: TextStyle(
-                                              fontSize: 26,
-                                              fontWeight: FontWeight.bold,
-                                            ),
-                                          ),
-                                          Spacer(),
-                                          Text(
-                                            '\$ ${dish.price.toStringAsFixed(2)}',
-                                            style: TextStyle(
-                                              fontSize: 24,
-                                              fontWeight: FontWeight.w600,
-                                            ),
-                                          ),
-                                        ],
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              ),
-                            );
-                          },
-                        );
-                      },
-                    ),
+                            },
+                          );
+                        },
+                      ),
             ),
           ],
         ),
