@@ -1,21 +1,15 @@
 import 'package:firebase_core/firebase_core.dart';
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:restaurant_management/controllers/user_controller.dart';
-import 'package:restaurant_management/firebase_options.dart';
 import 'package:restaurant_management/layouts/menu_management.dart';
+import 'package:restaurant_management/services/firebase_options.dart';
 
 import '../models/user.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  await Firebase.initializeApp(
-    options: DefaultFirebaseOptions.currentPlatform,
-  );
-  runApp(MaterialApp(
-    home: Login_Screen(),
-    debugShowCheckedModeBanner: false,
-  ));
+  await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
+  runApp(MaterialApp(home: Login_Screen(), debugShowCheckedModeBanner: false));
 }
 
 class Login_Screen extends StatefulWidget {
@@ -52,9 +46,7 @@ class _Login_ScreenState extends State<Login_Screen> {
     }
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
-        content: Center(
-          child: Text(msg),
-        ),
+        content: Center(child: Text(msg)),
         duration: Duration(seconds: 1),
         behavior: SnackBarBehavior.floating,
       ),
@@ -93,9 +85,7 @@ class _Login_ScreenState extends State<Login_Screen> {
                       fontWeight: FontWeight.w600,
                     ),
                   ),
-                  SizedBox(
-                    height: 60,
-                  ),
+                  SizedBox(height: 60),
                   TextField(
                     controller: _usernameController,
                     decoration: InputDecoration(
@@ -104,10 +94,7 @@ class _Login_ScreenState extends State<Login_Screen> {
                       prefixIcon: Icon(Icons.person),
                     ),
                   ),
-                  SizedBox(
-                    width: 20,
-                    height: 20,
-                  ),
+                  SizedBox(width: 20, height: 20),
                   TextField(
                     controller: _passwordController,
                     keyboardType: TextInputType.text,
@@ -118,21 +105,19 @@ class _Login_ScreenState extends State<Login_Screen> {
                       prefixIcon: Icon(Icons.lock),
                     ),
                   ),
-                  SizedBox(
-                    height: 80,
-                  ),
+                  SizedBox(height: 80),
                   _isChecking
                       ? CircularProgressIndicator()
                       : ElevatedButton(
-                          onPressed: () => _login(context),
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: Color.fromRGBO(78, 123, 234, 0.8),
-                          ),
-                          child: Text(
-                            'SIGN IN',
-                            style: TextStyle(color: Colors.white),
-                          ),
+                        onPressed: () => _login(context),
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Color.fromRGBO(78, 123, 234, 0.8),
                         ),
+                        child: Text(
+                          'SIGN IN',
+                          style: TextStyle(color: Colors.white),
+                        ),
+                      ),
                 ],
               ),
             ),
