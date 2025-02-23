@@ -31,7 +31,7 @@ class _Login_ScreenState extends State<Login_Screen> {
       FocusScope.of(context).unfocus();
     });
 
-    User? user = await _userController.findUser(
+    User? user = await _userController.getUser(
       _usernameController.text.trim(),
       _passwordController.text.trim(),
     );

@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:restaurant_management/controllers/template_controller.dart';
 import 'package:restaurant_management/services/firebase_storage_service.dart';
+
 import '../models/dish.dart';
 
 class DishController extends Controller<Dish> {
@@ -15,18 +16,29 @@ class DishController extends Controller<Dish> {
 
   final FirebaseStorageService _storageService = FirebaseStorageService();
 
-  @override
-  Dish toObject(String id, Map<String, dynamic> data) =>
-      Dish.toObject(id, data);
-
   Future<bool> uploadDish(File? image, Dish dish) async {
     try {
       await _storageService.uploadImage(image, dish.imgPath);
-      await db.add(dish.toFirestore());
+      db.add(dish.toFirestore());
       return true;
     } catch (e) {
       print('ERROR UPLOADING DISH: $e');
       return false;
     }
+  }
+
+  @override
+  Dish toObject(String id, Map<String, dynamic> data) {
+    return Dish.toObject(id, data);
+  }
+
+  @override
+  Map<String, dynamic> toFirestore(Dish object) {
+    return object.toFirestore();
+  }
+
+  @override
+  String getId(Dish item) {
+    return item.id ?? '';
   }
 }

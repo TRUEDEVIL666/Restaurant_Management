@@ -1,21 +1,17 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 
 class User {
-  final String? _id;
-  String _username, _password, _phoneNumber;
-  List<Timestamp>? _loginHistory;
+  final String? id;
+  String username, password, phoneNumber;
+  List<Timestamp>? loginHistory;
 
   User({
-    String? id,
-    required String username,
-    required String password,
-    required String phoneNumber,
+    this.id,
+    required this.username,
+    required this.password,
+    required this.phoneNumber,
     List<Timestamp>? loginHistory,
-  })  : _id = id,
-        _username = username,
-        _password = password,
-        _phoneNumber = phoneNumber,
-        _loginHistory = loginHistory;
+  }) : loginHistory = loginHistory ?? [];
 
   factory User.fromFirestore(String docId, Map<String, dynamic> doc) {
     return User(
@@ -28,40 +24,14 @@ class User {
 
   Map<String, dynamic> toFirestore() {
     return {
-      'username': _username,
-      'password': _password,
-      'phoneNumber': _phoneNumber,
+      'username': username,
+      'password': password,
+      'phoneNumber': phoneNumber,
     };
-  }
-
-  String? get getId => _id;
-
-  String get getUsername => _username;
-
-  set setUsername(String value) {
-    _username = value;
-  }
-
-  get getPassword => _password;
-
-  set setPassword(value) {
-    _password = value;
-  }
-
-  get getPhoneNumber => _phoneNumber;
-
-  set setPhoneNumber(value) {
-    _phoneNumber = value;
-  }
-
-  List<Timestamp>? get getLoginHistory => _loginHistory;
-
-  set loginHistory(List<Timestamp> value) {
-    _loginHistory = value;
   }
 
   @override
   String toString() {
-    return '$_username has signed in';
+    return 'User{id: $id, username: $username, password: $password, phoneNumber: $phoneNumber, loginHistory: $loginHistory}';
   }
 }

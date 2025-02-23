@@ -1,26 +1,21 @@
 class Dish {
-  final String? _id;
-  String _dishName, _imgPath, _category;
-  List<String> _ingredients, _subCategories;
-  double _price, _discount;
+  final String? id;
+  String dishName, imgPath, category;
+  List<String> ingredients, subCategories;
+  double price, discount;
 
   Dish({
-    String? id,
-    required String dishName,
-    required String imgPath,
-    required List<String> ingredients,
+    this.id,
+    required this.dishName,
+    required this.imgPath,
+    required this.ingredients,
     String? category,
     List<String>? subCategories,
-    required double price,
+    required this.price,
     double? discount,
-  })  : _id = id,
-        _dishName = dishName,
-        _imgPath = imgPath,
-        _ingredients = ingredients,
-        _category = category ?? '',
-        _subCategories = subCategories ?? [],
-        _price = price,
-        _discount = discount ?? 0;
+  }) : category = category ?? '',
+       subCategories = subCategories ?? [],
+       discount = discount ?? 0;
 
   factory Dish.toObject(String docId, Map<String, dynamic> doc) {
     return Dish(
@@ -37,62 +32,18 @@ class Dish {
 
   Map<String, dynamic> toFirestore() {
     return {
-      'dishName': _dishName,
-      'imgPath': _imgPath,
-      'ingredients': _ingredients,
-      'category': _category,
-      'subCategories': _subCategories,
-      'price': _price,
-      'discount': _discount,
+      'dishName': dishName,
+      'imgPath': imgPath,
+      'ingredients': ingredients,
+      'category': category,
+      'subCategories': subCategories,
+      'price': price,
+      'discount': discount,
     };
   }
 
-  String? get id => _id;
-
   @override
   String toString() {
-    return '$_dishName costs $_price';
-  }
-
-  String get dishName => _dishName;
-
-  set dishName(String value) {
-    _dishName = value;
-  }
-
-  get imgPath => _imgPath;
-
-  set imgPath(value) {
-    _imgPath = value;
-  }
-
-  get category => _category;
-
-  set category(value) {
-    _category = value;
-  }
-
-  List<String> get ingredients => _ingredients;
-
-  set ingredients(List<String> value) {
-    _ingredients = value;
-  }
-
-  get subCategories => _subCategories;
-
-  set subCategories(value) {
-    _subCategories = value;
-  }
-
-  double get price => _price;
-
-  set price(double value) {
-    _price = value;
-  }
-
-  get discount => _discount;
-
-  set discount(value) {
-    _discount = value;
+    return 'Dish{id: $id, dishName: $dishName, imgPath: $imgPath, category: $category, ingredients: $ingredients, subCategories: $subCategories, price: $price, discount: $discount}';
   }
 }
