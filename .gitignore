@@ -45,6 +45,7 @@ app.*.map.json
 /android/app/release
 
 # Manually added
+pubspec.lock
 linux/flutter
 macos/Flutter
 windows/flutter

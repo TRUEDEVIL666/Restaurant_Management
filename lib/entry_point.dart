@@ -3,10 +3,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 
 import 'constants.dart';
-import 'screens/home/home_screen.dart';
-import 'screens/orderDetails/order_details_screen.dart';
-import 'screens/profile/profile_screen.dart';
-import 'screens/search/search_screen.dart';
+import 'layouts/home/home_screen.dart';
+import 'layouts/orderDetails/order_details_screen.dart';
+import 'layouts/profile/profile_screen.dart';
+import 'layouts/search/search_screen.dart';
 
 class EntryPoint extends StatefulWidget {
   const EntryPoint({super.key});
