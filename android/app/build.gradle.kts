@@ -8,7 +8,7 @@ plugins {
 android {
     namespace = "com.example.restaurant_management"
     compileSdk = 35
-    ndkVersion = "28.0.13004108"
+    ndkVersion = "29.0.13113456"
 
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_11
