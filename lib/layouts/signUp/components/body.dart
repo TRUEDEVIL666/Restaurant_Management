@@ -2,7 +2,7 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 
-import '../../../components/buttons/socal_button.dart';
+import '../../../components/buttons/social_button.dart';
 import '../../../components/welcome_text.dart';
 import '../../../constants.dart';
 import '../../auth/sign_in_screen.dart';
@@ -33,22 +33,24 @@ class Body extends StatelessWidget {
               Center(
                 child: Text.rich(
                   TextSpan(
-                    style: Theme.of(context)
-                        .textTheme
-                        .bodySmall!
-                        .copyWith(fontWeight: FontWeight.w500),
+                    style: Theme.of(context).textTheme.bodySmall!.copyWith(
+                      fontWeight: FontWeight.w500,
+                    ),
                     text: "Already have account? ",
                     children: <TextSpan>[
                       TextSpan(
                         text: "Sign In",
                         style: const TextStyle(color: primaryColor),
-                        recognizer: TapGestureRecognizer()
-                          ..onTap = () => Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                  builder: (context) => const SignInScreen(),
-                                ),
-                              ),
+                        recognizer:
+                            TapGestureRecognizer()
+                              ..onTap =
+                                  () => Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                      builder:
+                                          (context) => const SignInScreen(),
+                                    ),
+                                  ),
                       ),
                     ],
                   ),
@@ -67,7 +69,7 @@ class Body extends StatelessWidget {
               const SizedBox(height: 16),
 
               // Facebook
-              SocalButton(
+              SocialButton(
                 press: () {},
                 text: "Connect with Facebook",
                 color: const Color(0xFF395998),
@@ -82,13 +84,11 @@ class Body extends StatelessWidget {
               const SizedBox(height: 16),
 
               // Google
-              SocalButton(
+              SocialButton(
                 press: () {},
                 text: "Connect with Google",
                 color: const Color(0xFF4285F4),
-                icon: SvgPicture.asset(
-                  'assets/icons/google.svg',
-                ),
+                icon: SvgPicture.asset('assets/icons/google.svg'),
               ),
               const SizedBox(height: defaultPadding),
             ],

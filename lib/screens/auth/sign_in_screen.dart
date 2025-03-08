@@ -2,11 +2,11 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 
-import '../../components/buttons/socal_button.dart';
+import '../../components/buttons/social_button.dart';
 import '../../components/welcome_text.dart';
 import '../../constants.dart';
-import 'sign_up_screen.dart';
 import 'components/sign_in_form.dart';
+import 'sign_up_screen.dart';
 
 class SignInScreen extends StatelessWidget {
   const SignInScreen({super.key});
@@ -14,10 +14,7 @@ class SignInScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        leading: const SizedBox(),
-        title: const Text("Sign In"),
-      ),
+      appBar: AppBar(leading: const SizedBox(), title: const Text("Sign In")),
       body: SingleChildScrollView(
         child: Padding(
           padding: const EdgeInsets.symmetric(horizontal: defaultPadding),
@@ -37,23 +34,25 @@ class SignInScreen extends StatelessWidget {
               Center(
                 child: Text.rich(
                   TextSpan(
-                    style: Theme.of(context)
-                        .textTheme
-                        .bodySmall!
-                        .copyWith(fontWeight: FontWeight.w600),
+                    style: Theme.of(context).textTheme.bodySmall!.copyWith(
+                      fontWeight: FontWeight.w600,
+                    ),
                     text: "Don’t have account? ",
                     children: <TextSpan>[
                       TextSpan(
                         text: "Create new account.",
                         style: const TextStyle(color: primaryColor),
-                        recognizer: TapGestureRecognizer()
-                          ..onTap = () => Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                  builder: (context) => const SignUpScreen(),
-                                ),
-                              ),
-                      )
+                        recognizer:
+                            TapGestureRecognizer()
+                              ..onTap =
+                                  () => Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                      builder:
+                                          (context) => const SignUpScreen(),
+                                    ),
+                                  ),
+                      ),
                     ],
                   ),
                 ),
@@ -61,7 +60,7 @@ class SignInScreen extends StatelessWidget {
               const SizedBox(height: defaultPadding),
 
               // Facebook
-              SocalButton(
+              SocialButton(
                 press: () {},
                 text: "Connect with Facebook",
                 color: const Color(0xFF395998),
@@ -76,13 +75,11 @@ class SignInScreen extends StatelessWidget {
               const SizedBox(height: defaultPadding),
 
               // Google
-              SocalButton(
+              SocialButton(
                 press: () {},
                 text: "Connect with Google",
                 color: const Color(0xFF4285F4),
-                icon: SvgPicture.asset(
-                  'assets/icons/google.svg',
-                ),
+                icon: SvgPicture.asset('assets/icons/google.svg'),
               ),
               const SizedBox(height: defaultPadding),
             ],

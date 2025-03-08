@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart';
 
-class SocalButton extends StatelessWidget {
+class SocialButton extends StatelessWidget {
   final Color color;
   final String text;
   final Widget icon;
   final GestureTapCallback press;
 
-  const SocalButton({
+  const SocialButton({
     super.key,
     required this.color,
     required this.icon,
@@ -24,7 +24,8 @@ class SocalButton extends StatelessWidget {
           padding: padding,
           backgroundColor: color,
           shape: const RoundedRectangleBorder(
-              borderRadius: BorderRadius.all(Radius.circular(8))),
+            borderRadius: BorderRadius.all(Radius.circular(8)),
+          ),
         ),
         onPressed: press,
         child: Row(
@@ -42,10 +43,10 @@ class SocalButton extends StatelessWidget {
             const Spacer(flex: 2),
             Text(
               text.toUpperCase(),
-              style: Theme.of(context)
-                  .textTheme
-                  .bodySmall!
-                  .copyWith(color: Colors.white, fontWeight: FontWeight.w600),
+              style: Theme.of(context).textTheme.bodySmall!.copyWith(
+                color: Colors.white,
+                fontWeight: FontWeight.w600,
+              ),
             ),
             const Spacer(flex: 3),
           ],

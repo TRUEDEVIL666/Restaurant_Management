@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
-import '../../entry_point.dart';
 
-import '../../components/buttons/secondery_button.dart';
+import '../../components/buttons/secondary_button.dart';
 import '../../components/welcome_text.dart';
 import '../../constants.dart';
+import '../../entry_point.dart';
 
 class FindRestaurantsScreen extends StatelessWidget {
   const FindRestaurantsScreen({super.key});
@@ -18,9 +18,7 @@ class FindRestaurantsScreen extends StatelessWidget {
           onPressed: () {
             Navigator.push(
               context,
-              MaterialPageRoute(
-                builder: (context) => const EntryPoint(),
-              ),
+              MaterialPageRoute(builder: (context) => const EntryPoint()),
             );
           },
         ),
@@ -38,7 +36,7 @@ class FindRestaurantsScreen extends StatelessWidget {
               ),
 
               // Getting Current Location
-              SeconderyButton(
+              SecondaryButton(
                 press: () {},
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.center,
@@ -54,11 +52,10 @@ class FindRestaurantsScreen extends StatelessWidget {
                     const SizedBox(width: 8),
                     Text(
                       "Use current location",
-                      style: Theme.of(context)
-                          .textTheme
-                          .bodyMedium!
-                          .copyWith(color: primaryColor),
-                    )
+                      style: Theme.of(
+                        context,
+                      ).textTheme.bodyMedium!.copyWith(color: primaryColor),
+                    ),
                   ],
                 ),
               ),
@@ -70,10 +67,9 @@ class FindRestaurantsScreen extends StatelessWidget {
                   children: [
                     TextFormField(
                       // onSaved: (value) => _location = value,
-                      style: Theme.of(context)
-                          .textTheme
-                          .bodyMedium!
-                          .copyWith(color: titleColor),
+                      style: Theme.of(
+                        context,
+                      ).textTheme.bodyMedium!.copyWith(color: titleColor),
                       cursorColor: primaryColor,
                       decoration: InputDecoration(
                         prefixIcon: Padding(
@@ -81,7 +77,9 @@ class FindRestaurantsScreen extends StatelessWidget {
                           child: SvgPicture.asset(
                             "assets/icons/marker.svg",
                             colorFilter: const ColorFilter.mode(
-                                bodyTextColor, BlendMode.srcIn),
+                              bodyTextColor,
+                              BlendMode.srcIn,
+                            ),
                           ),
                         ),
                         hintText: "Enter a new address",
