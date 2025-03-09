@@ -23,8 +23,7 @@ class SignInScreen extends StatelessWidget {
             children: [
               const WelcomeText(
                 title: "Welcome to",
-                text:
-                    "Enter your Phone number or Email \naddress for sign in. Enjoy your food :)",
+                text: "Enter your Phone number or Email \naddress to sign in.",
               ),
               const SignInForm(),
               const SizedBox(height: defaultPadding),
@@ -37,7 +36,7 @@ class SignInScreen extends StatelessWidget {
                     style: Theme.of(context).textTheme.bodySmall!.copyWith(
                       fontWeight: FontWeight.w600,
                     ),
-                    text: "Don’t have account? ",
+                    text: "Don’t have an account? ",
                     children: <TextSpan>[
                       TextSpan(
                         text: "Create new account.",

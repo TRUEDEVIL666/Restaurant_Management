@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
-import '../../findRestaurants/find_restaurants_screen.dart';
 
 import '../../../constants.dart';
+import '../../../controllers/user_controller.dart';
+import '../../../models/user.dart';
+import '../../findRestaurants/find_restaurants_screen.dart';
 import '../forgot_password_screen.dart';
 
 class SignInForm extends StatefulWidget {
@@ -14,6 +16,8 @@ class SignInForm extends StatefulWidget {
 class _SignInFormState extends State<SignInForm> {
   final _formKey = GlobalKey<FormState>();
 
+  TextEditingController idController = TextEditingController(),
+      passwordController = TextEditingController();
   bool _obscureText = true;
 
   @override
@@ -23,6 +27,7 @@ class _SignInFormState extends State<SignInForm> {
       child: Column(
         children: [
           TextFormField(
+            controller: idController,
             validator: emailValidator.call,
             onSaved: (value) {},
             textInputAction: TextInputAction.next,
@@ -33,6 +38,7 @@ class _SignInFormState extends State<SignInForm> {
 
           // Password Field
           TextFormField(
+            controller: passwordController,
             obscureText: _obscureText,
             validator: passwordValidator.call,
             onSaved: (value) {},
@@ -44,9 +50,10 @@ class _SignInFormState extends State<SignInForm> {
                     _obscureText = !_obscureText;
                   });
                 },
-                child: _obscureText
-                    ? const Icon(Icons.visibility_off, color: bodyTextColor)
-                    : const Icon(Icons.visibility, color: bodyTextColor),
+                child:
+                    _obscureText
+                        ? const Icon(Icons.visibility_off, color: bodyTextColor)
+                        : const Icon(Icons.visibility, color: bodyTextColor),
               ),
             ),
           ),
@@ -54,18 +61,18 @@ class _SignInFormState extends State<SignInForm> {
 
           // Forget Password
           GestureDetector(
-            onTap: () => Navigator.push(
-              context,
-              MaterialPageRoute(
-                builder: (context) => const ForgotPasswordScreen(),
-              ),
-            ),
+            onTap:
+                () => Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => const ForgotPasswordScreen(),
+                  ),
+                ),
             child: Text(
               "Forget Password?",
-              style: Theme.of(context)
-                  .textTheme
-                  .bodySmall!
-                  .copyWith(fontWeight: FontWeight.w500),
+              style: Theme.of(
+                context,
+              ).textTheme.bodySmall!.copyWith(fontWeight: FontWeight.w500),
             ),
           ),
           const SizedBox(height: defaultPadding),
@@ -91,5 +98,21 @@ class _SignInFormState extends State<SignInForm> {
         ],
       ),
     );
+  }
+
+  Future<bool> checkAccount() async {
+    UserController userController = UserController();
+    User? user = await userController.checkUser(
+      idController.text,
+      passwordController.text,
+    );
+    if (user != null) {
+      return true;
+    }
+
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(content: Text("Invalid username or password")),
+    );
+    return false;
   }
 }

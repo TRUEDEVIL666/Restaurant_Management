@@ -11,7 +11,21 @@ class UserController extends Controller<User> {
   static final _instance = UserController._internal();
   factory UserController() => _instance;
 
-  Future<User?> getUser(String username, String password) async {
+  Future<bool> checkUsername(String username) async {
+    try {
+      QuerySnapshot querySnapshot =
+          await db.where('username', isEqualTo: username).get();
+
+      if (querySnapshot.docs.isNotEmpty) {
+        return true;
+      }
+    } catch (e) {
+      print("ERROR CHECKING USERNAME: $e");
+    }
+    return false;
+  }
+
+  Future<User?> checkUser(String username, String password) async {
     try {
       QuerySnapshot querySnapshot =
           await db
