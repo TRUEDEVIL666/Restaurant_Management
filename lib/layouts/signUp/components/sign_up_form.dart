@@ -117,7 +117,9 @@ class _SignUpFormState extends State<SignUpForm> {
     UserController userController = UserController();
     String username = nameController.text,
         password = passwordController.text,
-        confirmPassword = passwordConfirmController.text;
+        confirmPassword = passwordConfirmController.text,
+        phone = phoneController.text,
+        email = emailController.text;
 
     if (password != confirmPassword) {
       ScaffoldMessenger.of(
@@ -127,12 +129,20 @@ class _SignUpFormState extends State<SignUpForm> {
       return false;
     }
 
-    if (await userController.checkUsername(username)) {
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(const SnackBar(content: Text("Username already exists")));
+    // Checking if the username, phone, or email already exists
+    String error = "already exists";
+    var checks = {
+      "username": await userController.checkUsername(username),
+      "phone": await userController.checkPhone(phone),
+      "email": await userController.checkEmail(email),
+    };
 
-      return false;
+    for (var entry in checks.entries) {
+      if (entry.value) {
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text("${entry.key} $error")));
+      }
     }
 
     User user = User(

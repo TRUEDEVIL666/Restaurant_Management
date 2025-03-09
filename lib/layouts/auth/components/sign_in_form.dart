@@ -79,18 +79,19 @@ class _SignInFormState extends State<SignInForm> {
 
           // Sign In Button
           ElevatedButton(
-            onPressed: () {
+            onPressed: () async {
               if (_formKey.currentState!.validate()) {
                 _formKey.currentState!.save();
 
-                // just for demo
-                Navigator.pushAndRemoveUntil(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => const FindRestaurantsScreen(),
-                  ),
-                  (_) => true,
-                );
+                if (await checkAccount()) {
+                  Navigator.pushAndRemoveUntil(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => const FindRestaurantsScreen(),
+                    ),
+                    (_) => true,
+                  );
+                }
               }
             },
             child: const Text("Sign in"),
@@ -102,7 +103,7 @@ class _SignInFormState extends State<SignInForm> {
 
   Future<bool> checkAccount() async {
     UserController userController = UserController();
-    User? user = await userController.checkUser(
+    User? user = await userController.login(
       idController.text,
       passwordController.text,
     );
@@ -111,7 +112,9 @@ class _SignInFormState extends State<SignInForm> {
     }
 
     ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text("Invalid username or password")),
+      const SnackBar(
+        content: Text("Invalid username or phone number or password"),
+      ),
     );
     return false;
   }
