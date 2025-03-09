@@ -85,7 +85,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
               const SignUpForm(),
               const SizedBox(height: defaultPadding),
 
-              // Already have account
+              // Already have an account
               Center(
                 child: Text.rich(
                   TextSpan(
