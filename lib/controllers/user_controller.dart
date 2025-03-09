@@ -11,11 +11,55 @@ class UserController extends Controller<User> {
   static final _instance = UserController._internal();
   factory UserController() => _instance;
 
-  Future<User?> getUser(String username, String password) async {
+  // Functions to check validity of username, phone, and email
+  Future<bool> checkUsername(String username) async {
+    return _checkValidity(username, 'username');
+  }
+
+  Future<bool> checkPhone(String phone) async {
+    return _checkValidity(phone, 'phone');
+  }
+
+  Future<bool> checkEmail(String email) async {
+    return _checkValidity(email, 'email');
+  }
+
+  Future<bool> _checkValidity(String content, String field) async {
+    try {
+      QuerySnapshot querySnapshot =
+          await db.where(field, isEqualTo: content).get();
+
+      if (querySnapshot.docs.isNotEmpty) {
+        return true;
+      }
+    } catch (e) {
+      print("ERROR CHECKING ${field.toUpperCase()}: $e");
+    }
+    return false;
+  }
+
+  // Functions to login with username or phone
+  Future<User?> login(String content, String password) async {
+    return await loginEmail(content, password) ?? loginPhone(content, password);
+  }
+
+  Future<User?> loginEmail(String email, String password) async {
+    return await loginField(email, password, 'email');
+  }
+
+  Future<User?> loginPhone(String phone, String password) async {
+    return await loginField(phone, password, 'phone');
+  }
+
+  Future<User?> loginField(
+    String content,
+    String password,
+    String field,
+  ) async {
     try {
       QuerySnapshot querySnapshot =
           await db
-              .where('username', isEqualTo: username)
+              .where(field, isEqualTo: content)
               .where('password', isEqualTo: password)
               .get();
 

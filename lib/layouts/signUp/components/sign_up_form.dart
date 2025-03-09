@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:restaurant_management/controllers/user_controller.dart';
+import 'package:restaurant_management/models/user.dart';
 
 import '../../../constants.dart';
 import '../../phoneLogin/phone_login_screen.dart';
@@ -13,6 +15,13 @@ class SignUpForm extends StatefulWidget {
 class _SignUpFormState extends State<SignUpForm> {
   final _formKey = GlobalKey<FormState>();
 
+  TextEditingController nameController = TextEditingController(),
+      emailController = TextEditingController(),
+          // TODO: Implement and assign the phone number controller
+          phoneController =
+          TextEditingController(),
+      passwordController = TextEditingController(),
+      passwordConfirmController = TextEditingController();
   bool _obscureText = true;
 
   @override
@@ -23,6 +32,7 @@ class _SignUpFormState extends State<SignUpForm> {
         children: [
           // Full Name Field
           TextFormField(
+            controller: nameController,
             validator: requiredValidator.call,
             onSaved: (value) {},
             textInputAction: TextInputAction.next,
@@ -32,6 +42,7 @@ class _SignUpFormState extends State<SignUpForm> {
 
           // Email Field
           TextFormField(
+            controller: emailController,
             validator: emailValidator.call,
             onSaved: (value) {},
             textInputAction: TextInputAction.next,
@@ -42,6 +53,7 @@ class _SignUpFormState extends State<SignUpForm> {
 
           // Password Field
           TextFormField(
+            controller: passwordController,
             obscureText: _obscureText,
             validator: passwordValidator.call,
             textInputAction: TextInputAction.next,
@@ -55,9 +67,10 @@ class _SignUpFormState extends State<SignUpForm> {
                     _obscureText = !_obscureText;
                   });
                 },
-                child: _obscureText
-                    ? const Icon(Icons.visibility_off, color: bodyTextColor)
-                    : const Icon(Icons.visibility, color: bodyTextColor),
+                child:
+                    _obscureText
+                        ? const Icon(Icons.visibility_off, color: bodyTextColor)
+                        : const Icon(Icons.visibility, color: bodyTextColor),
               ),
             ),
           ),
@@ -65,6 +78,7 @@ class _SignUpFormState extends State<SignUpForm> {
 
           // Confirm Password Field
           TextFormField(
+            controller: passwordConfirmController,
             obscureText: _obscureText,
             decoration: InputDecoration(
               hintText: "Confirm Password",
@@ -74,27 +88,74 @@ class _SignUpFormState extends State<SignUpForm> {
                     _obscureText = !_obscureText;
                   });
                 },
-                child: _obscureText
-                    ? const Icon(Icons.visibility_off, color: bodyTextColor)
-                    : const Icon(Icons.visibility, color: bodyTextColor),
+                child:
+                    _obscureText
+                        ? const Icon(Icons.visibility_off, color: bodyTextColor)
+                        : const Icon(Icons.visibility, color: bodyTextColor),
               ),
             ),
           ),
           const SizedBox(height: defaultPadding),
           // Sign Up Button
           ElevatedButton(
-            onPressed: () {
-              Navigator.pushReplacement(
-                context,
-                MaterialPageRoute(
-                  builder: (_) => const PhoneLoginScreen(),
-                ),
-              );
+            onPressed: () async {
+              if (await createUser()) {
+                Navigator.pushReplacement(
+                  context,
+                  MaterialPageRoute(builder: (_) => const PhoneLoginScreen()),
+                );
+              }
             },
             child: const Text("Sign Up"),
           ),
         ],
       ),
     );
+  }
+
+  Future<bool> createUser() async {
+    UserController userController = UserController();
+    String username = nameController.text,
+        password = passwordController.text,
+        confirmPassword = passwordConfirmController.text,
+        phone = phoneController.text,
+        email = emailController.text;
+
+    if (password != confirmPassword) {
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text("Passwords do not match")));
+
+      return false;
+    }
+
+    // Checking if the username, phone, or email already exists
+    String error = "already exists";
+    var checks = {
+      "username": await userController.checkUsername(username),
+      "phone": await userController.checkPhone(phone),
+      "email": await userController.checkEmail(email),
+    };
+
+    for (var entry in checks.entries) {
+      if (entry.value) {
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text("${entry.key} $error")));
+      }
+    }
+
+    User user = User(
+      username: username,
+      password: passwordController.text,
+      email: emailController.text,
+
+      // TODO: Replace empty string here with phone number from phone login
+      phoneNumber: "",
+    );
+
+    userController.addItem(user);
+
+    return true;
   }
 }
