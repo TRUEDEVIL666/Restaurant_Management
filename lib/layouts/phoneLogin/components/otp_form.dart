@@ -1,11 +1,7 @@
 import 'package:flutter/material.dart';
-import '../../../entry_point.dart';
-
 import 'package:form_field_validator/form_field_validator.dart';
 
 import '../../../constants.dart';
-
-import '../../../components/buttons/primary_button.dart';
 
 class OtpForm extends StatefulWidget {
   const OtpForm({super.key});
@@ -117,22 +113,6 @@ class _OtpFormState extends State<OtpForm> {
             ],
           ),
           const SizedBox(height: defaultPadding * 2),
-          // Continue Button
-          PrimaryButton(
-            text: "Continue",
-            press: () {
-              if (_formKey.currentState!.validate()) {
-                // If all data are correct then save data to out variables
-                _formKey.currentState!.save();
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => const EntryPoint(),
-                  ),
-                );
-              } else {}
-            },
-          )
         ],
       ),
     );

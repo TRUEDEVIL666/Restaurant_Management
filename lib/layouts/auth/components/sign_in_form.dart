@@ -28,11 +28,13 @@ class _SignInFormState extends State<SignInForm> {
         children: [
           TextFormField(
             controller: idController,
-            validator: emailValidator.call,
+            validator: emailOrPhoneValidator.call,
             onSaved: (value) {},
             textInputAction: TextInputAction.next,
             keyboardType: TextInputType.emailAddress,
-            decoration: const InputDecoration(hintText: "Email Address"),
+            decoration: const InputDecoration(
+              hintText: "Email Address or Phone Number",
+            ),
           ),
           const SizedBox(height: defaultPadding),
 
@@ -40,7 +42,7 @@ class _SignInFormState extends State<SignInForm> {
           TextFormField(
             controller: passwordController,
             obscureText: _obscureText,
-            validator: passwordValidator.call,
+            validator: signInPasswordValidator.call,
             onSaved: (value) {},
             decoration: InputDecoration(
               hintText: "Password",

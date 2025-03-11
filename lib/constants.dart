@@ -25,9 +25,7 @@ const EdgeInsets kTextFieldPadding = EdgeInsets.symmetric(
 // Text Field Decoration
 const OutlineInputBorder kDefaultOutlineInputBorder = OutlineInputBorder(
   borderRadius: BorderRadius.all(Radius.circular(6)),
-  borderSide: BorderSide(
-    color: Color(0xFFF3F2F2),
-  ),
+  borderSide: BorderSide(color: Color(0xFFF3F2F2)),
 );
 
 const InputDecoration otpInputDecoration = InputDecoration(
@@ -39,25 +37,62 @@ const InputDecoration otpInputDecoration = InputDecoration(
 const kErrorBorderSide = BorderSide(color: Colors.red, width: 1);
 
 // Validator
-final passwordValidator = MultiValidator([
+final nameValidator = MultiValidator([
+  RequiredValidator(errorText: 'Username is required'),
+  MinLengthValidator(3, errorText: 'Username must be at least 3 letters long'),
+]);
+
+final _passwordValidator = [
   RequiredValidator(errorText: 'Password is required'),
   MinLengthValidator(8, errorText: 'Password must be at least 8 digits long'),
-  PatternValidator(r'(?=.*?[#?!@$%^&*-/])',
-      errorText: 'Passwords must have at least one special character')
+];
+
+final signInPasswordValidator = MultiValidator(_passwordValidator);
+
+final signUpPasswordValidator = MultiValidator([
+  ..._passwordValidator,
+  PatternValidator(
+    r'(?=.*[A-Z])',
+    errorText: 'Password must contain at least one uppercase letter',
+  ),
+  PatternValidator(
+    r'(?=.*[0-9])',
+    errorText: 'Password must contain at least one number',
+  ),
+  PatternValidator(
+    r'(?=.*[@\$!%*?&])',
+    errorText: 'Password must contain at least one special character',
+  ),
 ]);
 
 final emailValidator = MultiValidator([
   RequiredValidator(errorText: 'Email is required'),
-  EmailValidator(errorText: 'Enter a valid email address')
+  EmailValidator(errorText: 'Enter a valid email address'),
 ]);
 
-final requiredValidator =
-    RequiredValidator(errorText: 'This field is required');
+final emailOrPhoneValidator = MultiValidator([
+  RequiredValidator(errorText: 'This field is required'),
+  PatternValidator(
+    r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$',
+    errorText: 'Please enter a valid email',
+  ),
+  PatternValidator(
+    r'^\+?[\d\s]{10,15}$',
+    errorText: 'Please enter a valid phone number',
+  ),
+]);
+
+final requiredValidator = RequiredValidator(
+  errorText: 'This field is required',
+);
 final matchValidator = MatchValidator(errorText: 'passwords do not match');
 
-final phoneNumberValidator = MinLengthValidator(10,
-    errorText: 'Phone Number must be at least 10 digits long');
+final phoneNumberValidator = MinLengthValidator(
+  10,
+  errorText: 'Phone Number must be at least 10 digits long',
+);
 
 // Common Text
 final Center kOrText = Center(
-    child: Text("Or", style: TextStyle(color: titleColor.withOpacity(0.7))));
+  child: Text("Or", style: TextStyle(color: titleColor.withOpacity(0.7))),
+);

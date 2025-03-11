@@ -3,6 +3,7 @@ import 'package:restaurant_management/controllers/user_controller.dart';
 import 'package:restaurant_management/models/user.dart';
 
 import '../../../constants.dart';
+import '../../phoneLogin/components/otp_form.dart';
 import '../../phoneLogin/phone_login_screen.dart';
 
 class SignUpForm extends StatefulWidget {
@@ -17,9 +18,7 @@ class _SignUpFormState extends State<SignUpForm> {
 
   TextEditingController nameController = TextEditingController(),
       emailController = TextEditingController(),
-          // TODO: Implement and assign the phone number controller
-          phoneController =
-          TextEditingController(),
+      phoneController = TextEditingController(),
       passwordController = TextEditingController(),
       passwordConfirmController = TextEditingController();
   bool _obscureText = true;
@@ -33,7 +32,7 @@ class _SignUpFormState extends State<SignUpForm> {
           // Full Name Field
           TextFormField(
             controller: nameController,
-            validator: requiredValidator.call,
+            validator: nameValidator.call,
             onSaved: (value) {},
             textInputAction: TextInputAction.next,
             decoration: const InputDecoration(hintText: "Full Name"),
@@ -55,7 +54,7 @@ class _SignUpFormState extends State<SignUpForm> {
           TextFormField(
             controller: passwordController,
             obscureText: _obscureText,
-            validator: passwordValidator.call,
+            validator: signUpPasswordValidator.call,
             textInputAction: TextInputAction.next,
             onChanged: (value) {},
             onSaved: (value) {},
@@ -80,6 +79,7 @@ class _SignUpFormState extends State<SignUpForm> {
           TextFormField(
             controller: passwordConfirmController,
             obscureText: _obscureText,
+            validator: signUpPasswordValidator.call,
             decoration: InputDecoration(
               hintText: "Confirm Password",
               suffixIcon: GestureDetector(
@@ -96,14 +96,33 @@ class _SignUpFormState extends State<SignUpForm> {
             ),
           ),
           const SizedBox(height: defaultPadding),
+
+          // Phone Field
+          TextFormField(
+            controller: phoneController,
+            validator: phoneNumberValidator.call,
+            onSaved: (value) {},
+            textInputAction: TextInputAction.next,
+            keyboardType: TextInputType.phone,
+            decoration: const InputDecoration(hintText: "Phone number"),
+          ),
+          const SizedBox(height: defaultPadding),
+
+          Text('Confirm OTP'),
+          const OtpForm(),
+          const SizedBox(height: defaultPadding),
+
           // Sign Up Button
           ElevatedButton(
             onPressed: () async {
-              if (await createUser()) {
-                Navigator.pushReplacement(
-                  context,
-                  MaterialPageRoute(builder: (_) => const PhoneLoginScreen()),
-                );
+              if (_formKey.currentState!.validate()) {
+                _formKey.currentState!.save();
+                if (await createUser()) {
+                  Navigator.pushReplacement(
+                    context,
+                    MaterialPageRoute(builder: (_) => const PhoneLoginScreen()),
+                  );
+                }
               }
             },
             child: const Text("Sign Up"),
@@ -149,9 +168,7 @@ class _SignUpFormState extends State<SignUpForm> {
       username: username,
       password: passwordController.text,
       email: emailController.text,
-
-      // TODO: Replace empty string here with phone number from phone login
-      phoneNumber: "",
+      phoneNumber: phoneController.text,
     );
 
     userController.addItem(user);
