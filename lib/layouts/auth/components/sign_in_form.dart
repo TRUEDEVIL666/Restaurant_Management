@@ -18,7 +18,7 @@ class _SignInFormState extends State<SignInForm> {
 
   TextEditingController idController = TextEditingController(),
       passwordController = TextEditingController();
-  bool _obscureText = true;
+  bool _obscureText = true, loggingIn = false;
 
   @override
   Widget build(BuildContext context) {
@@ -80,44 +80,53 @@ class _SignInFormState extends State<SignInForm> {
           const SizedBox(height: defaultPadding),
 
           // Sign In Button
-          ElevatedButton(
-            onPressed: () async {
-              if (_formKey.currentState!.validate()) {
-                _formKey.currentState!.save();
-
-                if (await checkAccount()) {
-                  Navigator.pushAndRemoveUntil(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => const FindRestaurantsScreen(),
-                    ),
-                    (_) => true,
-                  );
-                }
-              }
-            },
-            child: const Text("Sign in"),
-          ),
+          loggingIn
+              ? const CircularProgressIndicator()
+              : ElevatedButton(
+                onPressed: () async {
+                  login();
+                },
+                child: const Text("Sign in"),
+              ),
         ],
       ),
     );
   }
 
-  Future<bool> checkAccount() async {
+  Future<void> login() async {
+    setState(() {
+      loggingIn = true;
+    });
+
+    if (_formKey.currentState!.validate()) {
+      _formKey.currentState!.save();
+      checkAccount();
+    }
+
+    setState(() {
+      loggingIn = false;
+    });
+  }
+
+  Future<void> checkAccount() async {
     UserController userController = UserController();
     User? user = await userController.login(
       idController.text,
       passwordController.text,
     );
-    if (user != null) {
-      return true;
-    }
 
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(
-        content: Text("Invalid username or phone number or password"),
-      ),
-    );
-    return false;
+    if (user != null) {
+      Navigator.pushAndRemoveUntil(
+        context,
+        MaterialPageRoute(builder: (context) => const FindRestaurantsScreen()),
+        (_) => true,
+      );
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text("Invalid username or phone number or password"),
+        ),
+      );
+    }
   }
 }

@@ -73,12 +73,8 @@ final emailValidator = MultiValidator([
 final emailOrPhoneValidator = MultiValidator([
   RequiredValidator(errorText: 'This field is required'),
   PatternValidator(
-    r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$',
-    errorText: 'Please enter a valid email',
-  ),
-  PatternValidator(
-    r'^\+?[\d\s]{10,15}$',
-    errorText: 'Please enter a valid phone number',
+    r'^([\w-\.]+@([\w-]+\.)+[\w-]{2,4}$)|(^\+?[\d\s]{10,15}$)',
+    errorText: 'Please enter a valid email or phone number',
   ),
 ]);
 

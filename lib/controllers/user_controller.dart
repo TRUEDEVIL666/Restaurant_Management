@@ -29,9 +29,7 @@ class UserController extends Controller<User> {
       QuerySnapshot querySnapshot =
           await db.where(field, isEqualTo: content).get();
 
-      if (querySnapshot.docs.isNotEmpty) {
-        return true;
-      }
+      return querySnapshot.docs.isEmpty;
     } catch (e) {
       print("ERROR CHECKING ${field.toUpperCase()}: $e");
     }
@@ -58,14 +56,16 @@ class UserController extends Controller<User> {
   ) async {
     try {
       QuerySnapshot querySnapshot =
-          await db
-              .where(field, isEqualTo: content)
-              .where('password', isEqualTo: password)
-              .get();
+          await db.where(field, isEqualTo: content).get();
 
       if (querySnapshot.docs.isNotEmpty) {
         QueryDocumentSnapshot doc = querySnapshot.docs.first;
-        return toObject(doc.id, doc.data() as Map<String, dynamic>);
+
+        User user = toObject(doc.id, doc.data() as Map<String, dynamic>);
+
+        if (user.checkPassword(password)) {
+          return user;
+        }
       }
 
       print('USER NOT FOUND');

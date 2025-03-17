@@ -1,8 +1,6 @@
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_svg/flutter_svg.dart';
 
-import '../../components/buttons/social_button.dart';
 import '../../components/welcome_text.dart';
 import '../../constants.dart';
 import 'components/sign_in_form.dart';
@@ -56,31 +54,6 @@ class SignInScreen extends StatelessWidget {
                   ),
                 ),
               ),
-              const SizedBox(height: defaultPadding),
-
-              // Facebook
-              SocialButton(
-                press: () {},
-                text: "Connect with Facebook",
-                color: const Color(0xFF395998),
-                icon: SvgPicture.asset(
-                  'assets/icons/facebook.svg',
-                  colorFilter: const ColorFilter.mode(
-                    Color(0xFF395998),
-                    BlendMode.srcIn,
-                  ),
-                ),
-              ),
-              const SizedBox(height: defaultPadding),
-
-              // Google
-              SocialButton(
-                press: () {},
-                text: "Connect with Google",
-                color: const Color(0xFF4285F4),
-                icon: SvgPicture.asset('assets/icons/google.svg'),
-              ),
-              const SizedBox(height: defaultPadding),
             ],
           ),
         ),

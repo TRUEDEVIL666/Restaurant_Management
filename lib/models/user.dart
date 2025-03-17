@@ -19,17 +19,25 @@ class User {
        isManager = isManager ?? false,
        loginHistory = loginHistory ?? [];
 
+  User.fromMap({
+    required this.id,
+    required this.username,
+    required this.password,
+    required this.email,
+    required this.phoneNumber,
+    required this.isManager,
+    required this.loginHistory,
+  });
+
   factory User.fromFirestore(String docId, Map<String, dynamic> doc) {
-    return User(
+    return User.fromMap(
       id: docId,
       username: doc['username'],
       password: doc['password'],
       isManager: doc['isManager'],
       email: doc['email'],
       phoneNumber: doc['phoneNumber'],
-      loginHistory: List<Timestamp>.from(
-        doc['loginHistory'] ?? [Timestamp.now()],
-      ),
+      loginHistory: List<Timestamp>.from(doc['loginHistory']),
     );
   }
 
