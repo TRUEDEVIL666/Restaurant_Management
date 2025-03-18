@@ -3,8 +3,6 @@ import 'package:restaurant_management/controllers/user_controller.dart';
 import 'package:restaurant_management/models/user.dart';
 
 import '../../../constants.dart';
-import '../../phoneLogin/components/otp_form.dart';
-import '../../phoneLogin/phone_login_screen.dart';
 
 class SignUpForm extends StatefulWidget {
   const SignUpForm({super.key});
@@ -21,7 +19,7 @@ class _SignUpFormState extends State<SignUpForm> {
       phoneController = TextEditingController(),
       passwordController = TextEditingController(),
       passwordConfirmController = TextEditingController();
-  bool _obscureText = true;
+  bool _obscureText = true, isSigningUp = false;
 
   @override
   Widget build(BuildContext context) {
@@ -98,41 +96,57 @@ class _SignUpFormState extends State<SignUpForm> {
           const SizedBox(height: defaultPadding),
 
           // Phone Field
-          TextFormField(
-            controller: phoneController,
-            validator: phoneNumberValidator.call,
-            onSaved: (value) {},
-            textInputAction: TextInputAction.next,
-            keyboardType: TextInputType.phone,
-            decoration: const InputDecoration(hintText: "Phone number"),
+          Row(
+            children: [
+              Expanded(
+                child: TextFormField(
+                  controller: phoneController,
+                  validator: phoneNumberValidator.call,
+                  onSaved: (value) {},
+                  textInputAction: TextInputAction.next,
+                  keyboardType: TextInputType.phone,
+                  decoration: const InputDecoration(hintText: "Phone number"),
+                ),
+              ),
+              // ElevatedButton(onPressed: () {}, child: Text("Send OTP")),
+            ],
           ),
           const SizedBox(height: defaultPadding),
 
-          Text('Confirm OTP'),
-          const OtpForm(),
-          const SizedBox(height: defaultPadding),
+          // Text('Confirm OTP'),
+          // const OtpForm(),
+          // const SizedBox(height: defaultPadding),
 
           // Sign Up Button
-          ElevatedButton(
-            onPressed: () async {
-              if (_formKey.currentState!.validate()) {
-                _formKey.currentState!.save();
-                if (await createUser()) {
-                  Navigator.pushReplacement(
-                    context,
-                    MaterialPageRoute(builder: (_) => const PhoneLoginScreen()),
-                  );
-                }
-              }
-            },
-            child: const Text("Sign Up"),
-          ),
+          isSigningUp
+              ? const CircularProgressIndicator()
+              : ElevatedButton(
+                onPressed: () async {
+                  signUp();
+                },
+                child: const Text("Sign Up"),
+              ),
         ],
       ),
     );
   }
 
-  Future<bool> createUser() async {
+  Future<void> signUp() async {
+    setState(() {
+      isSigningUp = true;
+    });
+
+    if (_formKey.currentState!.validate()) {
+      _formKey.currentState!.save();
+      createAccount();
+    }
+
+    setState(() {
+      isSigningUp = false;
+    });
+  }
+
+  Future<void> createAccount() async {
     UserController userController = UserController();
     String username = nameController.text,
         password = passwordController.text,
@@ -145,7 +159,7 @@ class _SignUpFormState extends State<SignUpForm> {
         context,
       ).showSnackBar(const SnackBar(content: Text("Passwords do not match")));
 
-      return false;
+      return;
     }
 
     // Checking if the username, phone, or email already exists
@@ -156,23 +170,27 @@ class _SignUpFormState extends State<SignUpForm> {
       "email": await userController.checkEmail(email),
     };
 
+    bool isValid = true;
     for (var entry in checks.entries) {
-      if (entry.value) {
+      if (!entry.value) {
+        isValid = false;
+
         ScaffoldMessenger.of(
           context,
         ).showSnackBar(SnackBar(content: Text("${entry.key} $error")));
       }
     }
 
-    User user = User(
-      username: username,
-      password: passwordController.text,
-      email: emailController.text,
-      phoneNumber: phoneController.text,
-    );
+    if (isValid) {
+      User user = User(
+        username: username,
+        password: password,
+        email: email,
+        phoneNumber: phone,
+      );
 
-    userController.addItem(user);
-
-    return true;
+      userController.addItem(user);
+      Navigator.pop(context);
+    }
   }
 }
