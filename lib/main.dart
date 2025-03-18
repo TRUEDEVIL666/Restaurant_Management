@@ -1,9 +1,9 @@
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
+import 'package:restaurant_management/layouts/auth/sign_in_screen.dart';
 
 import 'constants.dart';
 import 'firebase_options.dart';
-import 'layouts/onboarding/onboarding_screen.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized(); // Ensure that binding is initialized
@@ -40,7 +40,7 @@ class MyApp extends StatelessWidget {
           hintStyle: TextStyle(color: bodyTextColor),
         ),
       ),
-      home: const OnboardingScreen(),
+      home: const SignInScreen(),
     );
   }
 }
