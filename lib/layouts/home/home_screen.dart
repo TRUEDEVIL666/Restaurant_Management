@@ -1,123 +1,130 @@
 import 'package:flutter/material.dart';
+import 'package:restaurant_management/layouts/home/TableDetailScreen.dart';
+import 'package:restaurant_management/layouts/profile/profile_screen.dart';
 
-import '../../components/cards/big/big_card_image_slide.dart';
-import '../../components/cards/big/restaurant_info_big_card.dart';
-import '../../components/section_title.dart';
-import '../../constants.dart';
-import '../../demo_data.dart';
-import '../../layouts/filter/filter_screen.dart';
-import '../details/details_screen.dart';
-import '../featured/featured_screen.dart';
-import 'components/medium_card_list.dart';
-import 'components/promotion_banner.dart';
-
-class HomeScreen extends StatelessWidget {
+class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
 
   @override
+  State<HomeScreen> createState() => _HomeScreenState();
+}
+
+class _HomeScreenState extends State<HomeScreen> {
+  int _selectedIndex = 0; // Trang hiện tại
+  final List<int> tableNumbers = List.generate(10, (index) => index + 1);
+  final Map<int, bool> tableStatus = {};
+
+  void _onItemTapped(int index) {
+    setState(() {
+      _selectedIndex = index;
+    });
+  }
+
+  @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        leading: const SizedBox(),
-        title: Column(
+    return WillPopScope(
+      onWillPop: () async {
+        if (_selectedIndex == 1) {
+          setState(() {
+            _selectedIndex = 0; // Quay về Home khi đang ở Profile
+          });
+          return false; // Không thoát app
+        }
+        return true; // Cho phép thoát app nếu đang ở Home
+      },
+      child: Scaffold(
+        appBar: AppBar(
+          title: Text(_selectedIndex == 0 ? 'Chọn Bàn Ăn' : 'Hồ Sơ Cá Nhân'),
+        ),
+        body: IndexedStack(
+          index: _selectedIndex,
           children: [
-            Text(
-              "Delivery to".toUpperCase(),
-              style: Theme.of(context)
-                  .textTheme
-                  .bodySmall!
-                  .copyWith(color: primaryColor),
-            ),
-            const Text(
-              "San Francisco",
-              style: TextStyle(color: Colors.black),
-            )
+            _buildTableGrid(),
+            ProfileScreen(),
           ],
         ),
+        bottomNavigationBar: BottomNavigationBar(
+          currentIndex: _selectedIndex,
+          onTap: _onItemTapped,
+          items: [
+            BottomNavigationBarItem(icon: Icon(Icons.table_chart), label: 'Bàn ăn'),
+            BottomNavigationBarItem(icon: Icon(Icons.person), label: 'Hồ sơ'),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildTableGrid() {
+    return GridView.builder(
+      padding: EdgeInsets.all(10.0),
+      gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+        crossAxisCount: 3,
+        crossAxisSpacing: 8,
+        mainAxisSpacing: 8,
+        childAspectRatio: 1.5,
+      ),
+      itemCount: tableNumbers.length,
+      itemBuilder: (context, index) {
+        int tableNumber = tableNumbers[index];
+        bool isOpened = tableStatus[tableNumber] ?? false;
+
+        return ElevatedButton(
+          onPressed: () {
+            if (!isOpened) {
+              _showConfirmationDialog(context, tableNumber);
+            } else {
+              _navigateToDetailScreen(context, tableNumber);
+            }
+          },
+          style: ElevatedButton.styleFrom(
+            backgroundColor: isOpened ? Colors.green : Colors.grey,
+            padding: EdgeInsets.symmetric(vertical: 16),
+            textStyle: TextStyle(fontSize: 18),
+          ),
+          child: Text('Bàn $tableNumber'),
+        );
+      },
+    );
+  }
+
+  void _showConfirmationDialog(BuildContext context, int tableNumber) {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Text('Xác nhận mở bàn'),
+        content: Text('Bạn có chắc chắn muốn mở bàn $tableNumber không?'),
         actions: [
           TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: Text('Không'),
+          ),
+          TextButton(
             onPressed: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (context) => const FilterScreen(),
-                ),
-              );
+              setState(() {
+                tableStatus[tableNumber] = true;
+              });
+              Navigator.pop(context);
+              _navigateToDetailScreen(context, tableNumber);
             },
-            child: Text(
-              "Filter",
-              style: Theme.of(context).textTheme.bodyLarge,
-            ),
+            child: Text('Có'),
           ),
         ],
       ),
-      body: SafeArea(
-        child: SingleChildScrollView(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              const SizedBox(height: defaultPadding),
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: defaultPadding),
-                child: BigCardImageSlide(images: demoBigImages),
-              ),
-              const SizedBox(height: defaultPadding * 2),
-              SectionTitle(
-                title: "Featured Partners",
-                press: () => Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => const FeaturedScreen(),
-                  ),
-                ),
-              ),
-              const SizedBox(height: defaultPadding),
-              const MediumCardList(),
-              const SizedBox(height: 20),
-              // Banner
-              const PromotionBanner(),
-              const SizedBox(height: 20),
-              SectionTitle(
-                title: "Best Pick",
-                press: () => Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => const FeaturedScreen(),
-                  ),
-                ),
-              ),
-              const SizedBox(height: 16),
-              const MediumCardList(),
-              const SizedBox(height: 20),
-              SectionTitle(title: "All Restaurants", press: () {}),
-              const SizedBox(height: 16),
+    );
+  }
 
-              // Demo list of Big Cards
-              ...List.generate(
-                // For demo we use 4 items
-                3,
-                (index) => Padding(
-                  padding: const EdgeInsets.fromLTRB(
-                      defaultPadding, 0, defaultPadding, defaultPadding),
-                  child: RestaurantInfoBigCard(
-                    // Images are List<String>
-                    images: demoBigImages..shuffle(),
-                    name: "McDonald's",
-                    rating: 4.3,
-                    numOfRating: 200,
-                    deliveryTime: 25,
-                    foodType: const ["Chinese", "American", "Deshi food"],
-                    press: () => Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => const DetailsScreen(),
-                      ),
-                    ),
-                  ),
-                ),
-              )
-            ],
-          ),
+  void _navigateToDetailScreen(BuildContext context, int tableNumber) {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => TableDetailScreen(
+          tableNumber: tableNumber,
+          onCloseTable: (closedTable) {
+            setState(() {
+              tableStatus[closedTable] = false;
+            });
+          },
         ),
       ),
     );
