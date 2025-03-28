@@ -27,7 +27,7 @@ class _EntryPointState extends State<EntryPoint> {
     {"icon": "assets/icons/profile.svg", "title": "Profile"},
   ];
 
-// Screens
+  // Screens
   final List<Widget> _screens = [
     const HomeScreen(),
     const SearchScreen(),
@@ -58,8 +58,9 @@ class _EntryPointState extends State<EntryPoint> {
               height: 30,
               width: 30,
               colorFilter: ColorFilter.mode(
-                  index == _selectedIndex ? primaryColor : bodyTextColor,
-                  BlendMode.srcIn),
+                index == _selectedIndex ? primaryColor : bodyTextColor,
+                BlendMode.srcIn,
+              ),
             ),
             label: _navitems[index]["title"],
           ),

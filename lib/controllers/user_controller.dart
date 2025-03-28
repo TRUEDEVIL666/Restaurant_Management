@@ -46,7 +46,7 @@ class UserController extends Controller<User> {
   }
 
   Future<User?> loginPhone(String phone, String password) async {
-    return await loginField(phone, password, 'phone');
+    return await loginField(phone, password, 'phoneNumber');
   }
 
   Future<User?> loginField(
@@ -67,13 +67,10 @@ class UserController extends Controller<User> {
           return user;
         }
       }
-
-      print('USER NOT FOUND');
-      return null;
     } catch (e) {
       print('ERROR FINDING USER: $e');
-      return null;
     }
+    return null;
   }
 
   @override

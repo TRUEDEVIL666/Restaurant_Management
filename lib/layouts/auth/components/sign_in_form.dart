@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import '../../../constants.dart';
 import '../../../controllers/user_controller.dart';
 import '../../../models/user.dart';
-import '../../findRestaurants/find_restaurants_screen.dart';
+import '../../home/home_screen.dart';
 import '../forgot_password_screen.dart';
 
 class SignInForm extends StatefulWidget {
@@ -118,7 +118,7 @@ class _SignInFormState extends State<SignInForm> {
     if (user != null) {
       Navigator.pushAndRemoveUntil(
         context,
-        MaterialPageRoute(builder: (context) => const FindRestaurantsScreen()),
+        MaterialPageRoute(builder: (context) => const HomeScreen()),
         (_) => true,
       );
     } else {
