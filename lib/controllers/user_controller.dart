@@ -75,7 +75,7 @@ class UserController extends Controller<User> {
 
   @override
   User toObject(String id, Map<String, dynamic> data) {
-    return User.fromFirestore(id, data);
+    return User.toObject(id, data);
   }
 
   @override

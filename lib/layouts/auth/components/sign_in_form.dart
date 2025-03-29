@@ -116,6 +116,9 @@ class _SignInFormState extends State<SignInForm> {
     );
 
     if (user != null) {
+      idController.clear();
+      passwordController.clear();
+
       Navigator.pushAndRemoveUntil(
         context,
         MaterialPageRoute(builder: (context) => const HomeScreen()),

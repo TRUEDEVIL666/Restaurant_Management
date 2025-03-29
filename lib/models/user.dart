@@ -29,7 +29,7 @@ class User {
     required this.loginHistory,
   });
 
-  factory User.fromFirestore(String docId, Map<String, dynamic> doc) {
+  factory User.toObject(String docId, Map<String, dynamic> doc) {
     return User.fromMap(
       id: docId,
       username: doc['username'],
