@@ -1,4 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class ProfileScreen extends StatefulWidget {
   const ProfileScreen({super.key});
@@ -8,81 +11,128 @@ class ProfileScreen extends StatefulWidget {
 }
 
 class _ProfileScreenState extends State<ProfileScreen> {
-  final TextEditingController _nameController = TextEditingController();
-  final TextEditingController _emailController = TextEditingController();
   final TextEditingController _currentPasswordController = TextEditingController();
   final TextEditingController _newPasswordController = TextEditingController();
   final TextEditingController _confirmPasswordController = TextEditingController();
 
-  String _name = 'Người dùng';
-  String _email = 'example@gmail.com';
-  String _password = '123456'; // Mật khẩu mặc định (chỉ mô phỏng)
+  User? _user;
+  String _userEmail = "Đang tải...";
+  String _username = "Đang tải...";
+  String _phoneNumber = "Đang tải...";
+  bool _obscureCurrentPassword = true;
+  bool _obscureNewPassword = true;
+  bool _obscureConfirmPassword = true;
 
-  bool _showPasswordFields = false; // Kiểm soát hiển thị trường mật khẩu
+  @override
+  void initState() {
+    super.initState();
+    _loadUserData();  // Gọi hàm load dữ liệu khi trang được khởi tạo
+  }
+
+  Future<void> _loadUserData() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+
+    String? userId = prefs.getString('userId');  // Lấy ID người dùng từ SharedPreferences
+
+    if (userId != null) {
+      print("User ID: $userId");
+
+      DocumentSnapshot userDoc = await FirebaseFirestore.instance
+          .collection('users')
+          .doc(userId)
+          .get();
+
+      if (userDoc.exists) {
+        Map<String, dynamic> userData = userDoc.data() as Map<String, dynamic>;
+
+        // Lưu dữ liệu người dùng vào biến
+        setState(() {
+          _username = userData['username'] ?? 'Unknown';
+          _userEmail = userData['email'] ?? 'No email';
+          _phoneNumber = userData['phoneNumber'] ?? 'No phone';
+        });
+
+        print("User loaded: $_username, Email: $_userEmail, Phone: $_phoneNumber");
+      } else {
+        print("User ID not found in Firestore");
+      }
+    } else {
+      print("No user ID found in SharedPreferences");
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: EdgeInsets.all(16.0),
+      padding: const EdgeInsets.all(16.0),
       child: SingleChildScrollView(
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text('Họ và Tên:', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
-            TextField(controller: _nameController, decoration: InputDecoration(hintText: _name)),
+            Text('Tên người dùng:', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+            Text(_username, style: TextStyle(fontSize: 16, color: Colors.blue)),
             SizedBox(height: 16),
+            
             Text('Email:', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
-            TextField(controller: _emailController, decoration: InputDecoration(hintText: _email)),
+            Text(_userEmail, style: TextStyle(fontSize: 16, color: Colors.blue)),
+            SizedBox(height: 16),
+            
+            Text('Số điện thoại:', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+            Text(_phoneNumber, style: TextStyle(fontSize: 16, color: Colors.blue)),
             SizedBox(height: 24),
-
-            // Nút mở rộng phần đổi mật khẩu
-            Center(
-              child: TextButton(
-                onPressed: () {
-                  setState(() {
-                    _showPasswordFields = !_showPasswordFields;
-                  });
-                },
-                child: Text(_showPasswordFields ? 'Ẩn đổi mật khẩu' : 'Thay đổi mật khẩu'),
-              ),
-            ),
-
-            if (_showPasswordFields) ...[
-              SizedBox(height: 16),
-              Text('Mật khẩu hiện tại:', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
-              TextField(
-                controller: _currentPasswordController,
-                obscureText: true,
-                decoration: InputDecoration(hintText: 'Nhập mật khẩu hiện tại'),
-              ),
-              SizedBox(height: 16),
-              Text('Mật khẩu mới:', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
-              TextField(
-                controller: _newPasswordController,
-                obscureText: true,
-                decoration: InputDecoration(hintText: 'Nhập mật khẩu mới'),
-              ),
-              SizedBox(height: 16),
-              Text('Xác nhận mật khẩu mới:', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
-              TextField(
-                controller: _confirmPasswordController,
-                obscureText: true,
-                decoration: InputDecoration(hintText: 'Nhập lại mật khẩu mới'),
-              ),
-              SizedBox(height: 24),
-              Center(
-                child: ElevatedButton(
-                  onPressed: _changePassword,
-                  child: Text('Cập nhật mật khẩu'),
+            
+            Text('Mật khẩu hiện tại:', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+            TextField(
+              controller: _currentPasswordController,
+              obscureText: _obscureCurrentPassword,
+              decoration: InputDecoration(
+                suffixIcon: IconButton(
+                  icon: Icon(_obscureCurrentPassword ? Icons.visibility_off : Icons.visibility),
+                  onPressed: () {
+                    setState(() {
+                      _obscureCurrentPassword = !_obscureCurrentPassword;
+                    });
+                  },
                 ),
               ),
-              SizedBox(height: 24),
-            ],
-
+            ),
+            SizedBox(height: 16),
+            Text('Mật khẩu mới:', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+            TextField(
+              controller: _newPasswordController,
+              obscureText: _obscureNewPassword,
+              decoration: InputDecoration(
+                suffixIcon: IconButton(
+                  icon: Icon(_obscureNewPassword ? Icons.visibility_off : Icons.visibility),
+                  onPressed: () {
+                    setState(() {
+                      _obscureNewPassword = !_obscureNewPassword;
+                    });
+                  },
+                ),
+              ),
+            ),
+            SizedBox(height: 16),
+            Text('Xác nhận mật khẩu mới:', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+            TextField(
+              controller: _confirmPasswordController,
+              obscureText: _obscureConfirmPassword,
+              decoration: InputDecoration(
+                suffixIcon: IconButton(
+                  icon: Icon(_obscureConfirmPassword ? Icons.visibility_off : Icons.visibility),
+                  onPressed: () {
+                    setState(() {
+                      _obscureConfirmPassword = !_obscureConfirmPassword;
+                    });
+                  },
+                ),
+              ),
+            ),
+            SizedBox(height: 24),
             Center(
               child: ElevatedButton(
-                onPressed: _saveProfile,
-                child: Text('Lưu Thay Đổi'),
+                onPressed: _changePassword,
+                child: Text('Cập nhật mật khẩu'),
               ),
             ),
           ],
@@ -91,60 +141,32 @@ class _ProfileScreenState extends State<ProfileScreen> {
     );
   }
 
-  // Hàm cập nhật thông tin cá nhân
-  void _saveProfile() {
-    setState(() {
-      _name = _nameController.text.isNotEmpty ? _nameController.text : _name;
-      _email = _emailController.text.isNotEmpty ? _emailController.text : _email;
-    });
-
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text('Cập nhật thông tin thành công!')),
-    );
-  }
-
-  // Hàm đổi mật khẩu
-  void _changePassword() {
+  void _changePassword() async {
+    if (_user == null) return;
     String currentPassword = _currentPasswordController.text;
     String newPassword = _newPasswordController.text;
     String confirmPassword = _confirmPasswordController.text;
-
-    if (currentPassword.isEmpty || newPassword.isEmpty || confirmPassword.isEmpty) {
-      _showMessage('Vui lòng nhập đầy đủ thông tin!');
-      return;
-    }
-
-    if (currentPassword != _password) {
-      _showMessage('Mật khẩu hiện tại không đúng!');
-      return;
-    }
-
-    if (newPassword.length < 6) {
-      _showMessage('Mật khẩu mới phải có ít nhất 6 ký tự!');
-      return;
-    }
 
     if (newPassword != confirmPassword) {
       _showMessage('Mật khẩu mới không trùng khớp!');
       return;
     }
 
-    // Cập nhật mật khẩu
-    setState(() {
-      _password = newPassword;
-    });
+    try {
+      AuthCredential credential = EmailAuthProvider.credential(
+        email: _userEmail,
+        password: currentPassword,
+      );
 
-    _currentPasswordController.clear();
-    _newPasswordController.clear();
-    _confirmPasswordController.clear();
-
-    _showMessage('Mật khẩu đã được cập nhật thành công!');
+      await _user!.reauthenticateWithCredential(credential);
+      await _user!.updatePassword(newPassword);
+      _showMessage('Mật khẩu đã được cập nhật thành công!');
+    } catch (e) {
+      _showMessage('Đổi mật khẩu thất bại! Kiểm tra lại thông tin.');
+    }
   }
 
-  // Hiển thị thông báo
   void _showMessage(String message) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text(message)),
-    );
+    ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(message)));
   }
 }
