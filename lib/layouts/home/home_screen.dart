@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:restaurant_management/controllers/table_controller.dart';
-import 'package:restaurant_management/layouts/home/TableDetailScreen.dart';
+import 'package:restaurant_management/layouts/home/table_detail_screen.dart';
 import 'package:restaurant_management/layouts/profile/profile_screen.dart';
 import 'package:restaurant_management/models/table.dart';
 

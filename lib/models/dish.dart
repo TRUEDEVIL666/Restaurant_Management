@@ -44,6 +44,14 @@ class Dish {
 
   @override
   String toString() {
-    return 'Dish{id: $id, dishName: $dishName, imgPath: $imgPath, category: $category, ingredients: $ingredients, subCategories: $subCategories, price: $price, discount: $discount}';
+    return 'Dish{'
+        'id: $id, '
+        'dishName: $dishName, '
+        'imgPath: $imgPath, '
+        'category: $category, '
+        'ingredients: $ingredients, '
+        'subCategories: $subCategories, '
+        'price: $price, '
+        'discount: $discount}';
   }
 }
