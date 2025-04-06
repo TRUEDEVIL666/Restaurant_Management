@@ -1,7 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
-
-import '../models/user.dart';
-import 'template_controller.dart';
+import 'package:restaurant_management/controllers/template_controller.dart';
+import 'package:restaurant_management/models/user.dart';
 
 class UserController extends Controller<User> {
   UserController._internal() {
@@ -61,9 +60,11 @@ class UserController extends Controller<User> {
       if (querySnapshot.docs.isNotEmpty) {
         QueryDocumentSnapshot doc = querySnapshot.docs.first;
 
-        User user = toObject(doc.id, doc.data() as Map<String, dynamic>);
+        User user = toObject(doc);
 
         if (user.checkPassword(password)) {
+          user.addLoginHistory(Timestamp.now());
+          db.doc(doc.id).update({'loginHistory': user.loginHistory});
           return user;
         }
       }
@@ -74,8 +75,8 @@ class UserController extends Controller<User> {
   }
 
   @override
-  User toObject(String id, Map<String, dynamic> data) {
-    return User.toObject(id, data);
+  User toObject(DocumentSnapshot doc) {
+    return User.toObject(doc);
   }
 
   @override

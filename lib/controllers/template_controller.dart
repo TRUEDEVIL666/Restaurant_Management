@@ -16,7 +16,7 @@ abstract class Controller<T> {
   Future<T?> getItem(String id) async {
     try {
       DocumentSnapshot doc = await db.doc(id).get();
-      return toObject(doc.id, doc.data() as Map<String, dynamic>);
+      return toObject(doc);
     } catch (e) {
       print('ERROR FETCHING ITEM: $e');
       return null;
@@ -27,10 +27,10 @@ abstract class Controller<T> {
     try {
       QuerySnapshot querySnapshot = await db.get();
       return querySnapshot.docs.map((doc) {
-        return toObject(doc.id, doc.data() as Map<String, dynamic>);
+        return toObject(doc);
       }).toList();
     } catch (e) {
-      print('ERROR FETCHING ITEMS: $e');
+      print('$T ERROR FETCHING ITEMS: $e');
       return [];
     }
   }
@@ -55,7 +55,7 @@ abstract class Controller<T> {
     }
   }
 
-  T toObject(String id, Map<String, dynamic> data);
+  T toObject(DocumentSnapshot doc);
   Map<String, dynamic> toFirestore(T object);
   String getId(T item);
 }

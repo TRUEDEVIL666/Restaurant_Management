@@ -23,10 +23,9 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   Future<void> loadTables() async {
-    setState(() async {
-      tables = await tableController.getItems();
-      _onItemTapped(0);
-    });
+    tables = await tableController.getItems();
+    _onItemTapped(0);
+    setState(() {});
   }
 
   void _onItemTapped(int index) {
@@ -103,14 +102,14 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
-  void _showConfirmationDialog(BuildContext context, int tableNumber) {
+  void _showConfirmationDialog(BuildContext context, int tableIndex) {
     showDialog(
       context: context,
       builder:
           (context) => AlertDialog(
             title: Text('Xác nhận mở bàn'),
             content: Text(
-              'Bạn có chắc chắn muốn mở bàn ${tableNumber + 1} không?',
+              'Bạn có chắc chắn muốn mở bàn ${tableIndex + 1} không?',
             ),
             actions: [
               TextButton(
@@ -120,10 +119,10 @@ class _HomeScreenState extends State<HomeScreen> {
               TextButton(
                 onPressed: () {
                   setState(() {
-                    switchTableState(tableNumber);
+                    tableController.switchTableState(tables[tableIndex]);
                   });
                   Navigator.pop(context);
-                  _navigateToDetailScreen(context, tableNumber);
+                  _navigateToDetailScreen(context, tableIndex);
                 },
                 child: Text('Có'),
               ),
@@ -132,25 +131,18 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
-  void switchTableState(int tableNumber) {
-    setState(() {
-      tables[tableNumber].isOccupied = !tables[tableNumber].isOccupied;
-      tableController.updateItem(tables[tableNumber]);
-    });
-  }
-
-  void _navigateToDetailScreen(BuildContext context, int tableNumber) {
-    Navigator.push(
+  Future<void> _navigateToDetailScreen(
+    BuildContext context,
+    int tableIndex,
+  ) async {
+    await Navigator.push(
       context,
       MaterialPageRoute(
-        builder:
-            (context) => TableDetailScreen(
-              tableNumber: tableNumber,
-              onCloseTable: (closedTable) {
-                switchTableState(closedTable);
-              },
-            ),
+        builder: (context) => TableDetailScreen(table: tables[tableIndex]),
       ),
     );
+    setState(() {
+      loadTables();
+    });
   }
 }

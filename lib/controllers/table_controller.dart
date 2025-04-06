@@ -1,7 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:restaurant_management/controllers/template_controller.dart';
-
-import '../models/table.dart';
+import 'package:restaurant_management/models/table.dart';
 
 class TableController extends Controller<RestaurantTable> {
   TableController._internal() {
@@ -11,9 +10,19 @@ class TableController extends Controller<RestaurantTable> {
   static final _instance = TableController._internal();
   factory TableController() => _instance;
 
+  void switchTableState(RestaurantTable table) {
+    table.isOccupied = !table.isOccupied;
+    if (table.isOccupied) {
+      table.openTime = Timestamp.now();
+    } else {
+      table.openTime = null;
+    }
+    updateItem(table);
+  }
+
   @override
-  RestaurantTable toObject(String id, Map<String, dynamic> data) {
-    return RestaurantTable.toObject(id, data);
+  RestaurantTable toObject(DocumentSnapshot doc) {
+    return RestaurantTable.toObject(doc);
   }
 
   @override
@@ -23,6 +32,6 @@ class TableController extends Controller<RestaurantTable> {
 
   @override
   String getId(RestaurantTable item) {
-    return item.id ?? '';
+    return item.id;
   }
 }

@@ -1,20 +1,21 @@
 import 'package:flutter/material.dart';
-import 'package:restaurant_management/controllers/dish_controller.dart';
-import 'package:restaurant_management/models/dish.dart';
+import 'package:restaurant_management/controllers/menu_controller.dart';
+import 'package:restaurant_management/controllers/table_controller.dart';
+import 'package:restaurant_management/models/menu.dart';
+import 'package:restaurant_management/models/table.dart';
 
 class TableDetailScreen extends StatefulWidget {
-  final int tableNumber;
-  final Function(int) onCloseTable; // Hàm callback để cập nhật trạng thái bàn
-
-  TableDetailScreen({required this.tableNumber, required this.onCloseTable});
+  final RestaurantTable table;
+  TableDetailScreen({required this.table});
 
   @override
   State<TableDetailScreen> createState() => _TableDetailScreenState();
 }
 
 class _TableDetailScreenState extends State<TableDetailScreen> {
-  List<Dish> menuItems = [];
-  final DishController dishController = DishController();
+  List<Menu> menuItems = [];
+  final FoodMenuController menuController = FoodMenuController();
+  final TableController tableController = TableController();
 
   @override
   void initState() {
@@ -23,16 +24,15 @@ class _TableDetailScreenState extends State<TableDetailScreen> {
   }
 
   Future<void> loadMenu() async {
-    setState(() async {
-      menuItems = await dishController.getItems();
-    });
+    menuItems = await menuController.getItems();
+    setState(() {});
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Bàn ${widget.tableNumber}'),
+        title: Text('Bàn ${widget.table.id}'),
         leading: IconButton(
           icon: Icon(Icons.arrow_back),
           onPressed: () => Navigator.pop(context),
@@ -53,7 +53,7 @@ class _TableDetailScreenState extends State<TableDetailScreen> {
               itemCount: menuItems.length,
               itemBuilder: (context, index) {
                 return ListTile(
-                  title: Text(menuItems[index].dishName),
+                  title: Text(menuItems[index].id),
                   trailing: SizedBox(
                     width: 100,
                     child: ElevatedButton(
@@ -87,7 +87,7 @@ class _TableDetailScreenState extends State<TableDetailScreen> {
           (context) => AlertDialog(
             title: Text('Xác nhận đóng bàn'),
             content: Text(
-              'Bạn có chắc chắn muốn đóng bàn ${widget.tableNumber} không?',
+              'Bạn có chắc chắn muốn đóng bàn ${widget.table.id} không?',
             ),
             actions: [
               TextButton(
@@ -96,9 +96,9 @@ class _TableDetailScreenState extends State<TableDetailScreen> {
               ),
               TextButton(
                 onPressed: () {
-                  widget.onCloseTable(
-                    widget.tableNumber,
-                  ); // Gọi callback để đổi trạng thái bàn
+                  setState(() {
+                    tableController.switchTableState(widget.table);
+                  });
                   Navigator.pop(context);
                   Navigator.pop(context); // Quay lại màn hình danh sách bàn
                 },
