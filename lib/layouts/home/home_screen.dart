@@ -1,7 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
-import 'package:restaurant_management/layouts/home/ComboSelectionScreen.dart';
-import 'package:restaurant_management/layouts/home/TableDetailScreen.dart';
+import 'package:restaurant_management/layouts/home/screens/combo_selection/ComboSelectionScreen.dart';
 import 'package:restaurant_management/layouts/profile/profile_screen.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -13,9 +12,15 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
-  int _selectedIndex = 0; // Trang hiện tại
+  int _selectedIndex = 0;
   final List<int> tableNumbers = List.generate(10, (index) => index + 1);
   final Map<int, bool> tableStatus = {};
+
+  @override
+  void initState() {
+    super.initState();
+    _loadOpenedTables();
+  }
 
   void _onItemTapped(int index) {
     setState(() {
@@ -23,146 +28,82 @@ class _HomeScreenState extends State<HomeScreen> {
     });
   }
 
+  Future<void> _loadOpenedTables() async {
+    final snapshot = await FirebaseFirestore.instance.collection('tables').get();
+    final newTableStatus = <int, bool>{};
 
-Future<void> _closeTable(int tableNumber) async {
-  final prefs = await SharedPreferences.getInstance();
-  final tableKey = 'table_$tableNumber';
+    for (var doc in snapshot.docs) {
+      final data = doc.data();
+      final id = doc.id; // expect something like 'table_1' or '1'
+      final tableNum = int.tryParse(id.replaceAll(RegExp(r'[^\d]'), '')) ?? -1;
 
-  // Xóa dữ liệu local
-  await prefs.remove('${tableKey}_openTime');
-
-  // Xóa combo
-  for (var i = 1; i <= 3; i++) {
-    await prefs.remove('${tableKey}_combo_Combo $i');
-  }
-
-  // Xóa ticket
-  for (var price in [219, 259, 299]) {
-    await prefs.remove('${tableKey}_ticket_$price');
-  }
-
-  // Xóa dữ liệu Firestore liên quan (nếu có)
-  final tableRef = FirebaseFirestore.instance.collection('tables').doc(tableNumber.toString());
-  await tableRef.update({
-    'currentBillId': FieldValue.delete(),
-    'status': 'closed',
-  }).catchError((e) {
-    print('Không thể cập nhật Firestore: $e');
-  });
-
-  setState(() {
-    tableStatus[tableNumber] = false;
-  });
-
-  ScaffoldMessenger.of(context).showSnackBar(
-    SnackBar(content: Text('Đã đóng bàn $tableNumber')),
-  );
-}
-
-  @override
-  Widget build(BuildContext context) {
-    return WillPopScope(
-      onWillPop: () async {
-        if (_selectedIndex == 1) {
-          setState(() {
-            _selectedIndex = 0; // Quay về Home khi đang ở Profile
-          });
-          return false; // Không thoát app
-        }
-        return true; // Cho phép thoát app nếu đang ở Home
-      },
-      child: Scaffold(
-        appBar: AppBar(
-          title: Text(_selectedIndex == 0 ? 'Chọn Bàn Ăn' : 'Hồ Sơ Cá Nhân'),
-        ),
-        body: IndexedStack(
-          index: _selectedIndex,
-          children: [
-            _buildTableGrid(),
-            ProfileScreen(),
-          ],
-        ),
-        bottomNavigationBar: BottomNavigationBar(
-          currentIndex: _selectedIndex,
-          onTap: _onItemTapped,
-          items: [
-            BottomNavigationBarItem(icon: Icon(Icons.table_chart), label: 'Bàn ăn'),
-            BottomNavigationBarItem(icon: Icon(Icons.person), label: 'Hồ sơ'),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildTableGrid() {
-    return GridView.builder(
-      padding: EdgeInsets.all(10.0),
-      gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-        crossAxisCount: 3,
-        crossAxisSpacing: 8,
-        mainAxisSpacing: 8,
-        childAspectRatio: 1.5,
-      ),
-      itemCount: tableNumbers.length,
-      itemBuilder: (context, index) {
-        int tableNumber = tableNumbers[index];
-        bool isOpened = tableStatus[tableNumber] ?? false;
-
-        return GestureDetector(
-  onLongPress: () => _showCloseTableDialog(context, tableNumber),
-  child: ElevatedButton(
-    onPressed: () {
-      if (!isOpened) {
-        _showConfirmationDialog(context, tableNumber);
-      } else {
-        _navigateToDetailScreen(context, tableNumber);
+      if (tableNum > 0) {
+        newTableStatus[tableNum] = data['status'] == 'opened';
       }
-    },
-    style: ElevatedButton.styleFrom(
-      backgroundColor: isOpened ? Colors.green : Colors.grey,
-      padding: EdgeInsets.symmetric(vertical: 16),
-      textStyle: TextStyle(fontSize: 18),
-    ),
-    child: Text('Bàn $tableNumber'),
-  ),
-);
+    }
 
-      },
+    setState(() {
+      tableStatus.addAll(newTableStatus);
+    });
+  }
+
+  Future<void> _closeTable(int tableNumber) async {
+    final prefs = await SharedPreferences.getInstance();
+    final tableKey = 'table_$tableNumber';
+
+    await prefs.remove('${tableKey}_openTime');
+    for (var i = 1; i <= 3; i++) {
+      await prefs.remove('${tableKey}_combo_Combo $i');
+    }
+    for (var price in [219, 259, 299]) {
+      await prefs.remove('${tableKey}_ticket_$price');
+    }
+
+    final tableRef = FirebaseFirestore.instance.collection('tables').doc('table_$tableNumber');
+    await tableRef.set({
+      'status': 'closed',
+      'currentBillId': FieldValue.delete(),
+      'updatedAt': FieldValue.serverTimestamp(),
+    }, SetOptions(merge: true));
+
+    setState(() {
+      tableStatus[tableNumber] = false;
+    });
+
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text('Đã đóng bàn $tableNumber')),
     );
   }
 
   void _showCloseTableDialog(BuildContext context, int tableNumber) {
-  bool isOpened = tableStatus[tableNumber] ?? false;
+    if (!(tableStatus[tableNumber] ?? false)) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Bàn $tableNumber chưa được mở!')),
+      );
+      return;
+    }
 
-  if (!isOpened) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text('Bàn $tableNumber chưa được mở!')),
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Text('Xác nhận đóng bàn'),
+        content: Text('Bạn có chắc chắn muốn đóng bàn $tableNumber không?'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: Text('Hủy'),
+          ),
+          TextButton(
+            onPressed: () async {
+              Navigator.pop(context);
+              await _closeTable(tableNumber);
+            },
+            child: Text('Đóng bàn'),
+          ),
+        ],
+      ),
     );
-    return;
   }
-
-  showDialog(
-    context: context,
-    builder: (context) => AlertDialog(
-      title: Text('Xác nhận đóng bàn'),
-      content: Text('Bạn có chắc chắn muốn đóng bàn $tableNumber không?'),
-      actions: [
-        TextButton(
-          onPressed: () => Navigator.pop(context),
-          child: Text('Hủy'),
-        ),
-        TextButton(
-          onPressed: () async {
-            Navigator.pop(context);
-            await _closeTable(tableNumber);
-          },
-          child: Text('Đóng bàn'),
-        ),
-      ],
-    ),
-  );
-}
-
 
   void _showConfirmationDialog(BuildContext context, int tableNumber) {
     showDialog(
@@ -176,10 +117,16 @@ Future<void> _closeTable(int tableNumber) async {
             child: Text('Không'),
           ),
           TextButton(
-            onPressed: () {
+            onPressed: () async {
               setState(() {
                 tableStatus[tableNumber] = true;
               });
+
+              await FirebaseFirestore.instance.collection('tables').doc('table_$tableNumber').set({
+                'status': 'opened',
+                'updatedAt': FieldValue.serverTimestamp(),
+              }, SetOptions(merge: true));
+
               Navigator.pop(context);
               _navigateToDetailScreen(context, tableNumber);
             },
@@ -201,6 +148,77 @@ Future<void> _closeTable(int tableNumber) async {
               tableStatus[closedTable] = false;
             });
           },
+        ),
+      ),
+    );
+  }
+
+  Widget _buildTableGrid() {
+    return GridView.builder(
+      padding: EdgeInsets.all(10.0),
+      gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+        crossAxisCount: 3,
+        crossAxisSpacing: 8,
+        mainAxisSpacing: 8,
+        childAspectRatio: 1.5,
+      ),
+      itemCount: tableNumbers.length,
+      itemBuilder: (context, index) {
+        int tableNumber = tableNumbers[index];
+        bool isOpened = tableStatus[tableNumber] ?? false;
+
+        return GestureDetector(
+          onLongPress: () => _showCloseTableDialog(context, tableNumber),
+          child: ElevatedButton(
+            onPressed: () {
+              if (!isOpened) {
+                _showConfirmationDialog(context, tableNumber);
+              } else {
+                _navigateToDetailScreen(context, tableNumber);
+              }
+            },
+            style: ElevatedButton.styleFrom(
+              backgroundColor: isOpened ? Colors.green : Colors.grey,
+              padding: EdgeInsets.symmetric(vertical: 16),
+              textStyle: TextStyle(fontSize: 18),
+            ),
+            child: Text('Bàn $tableNumber'),
+          ),
+        );
+      },
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return WillPopScope(
+      onWillPop: () async {
+        if (_selectedIndex == 1) {
+          setState(() {
+            _selectedIndex = 0;
+          });
+          return false;
+        }
+        return true;
+      },
+      child: Scaffold(
+        appBar: AppBar(
+          title: Text(_selectedIndex == 0 ? 'Chọn Bàn Ăn' : 'Hồ Sơ Cá Nhân'),
+        ),
+        body: IndexedStack(
+          index: _selectedIndex,
+          children: [
+            _buildTableGrid(),
+            ProfileScreen(),
+          ],
+        ),
+        bottomNavigationBar: BottomNavigationBar(
+          currentIndex: _selectedIndex,
+          onTap: _onItemTapped,
+          items: [
+            BottomNavigationBarItem(icon: Icon(Icons.table_chart), label: 'Bàn ăn'),
+            BottomNavigationBarItem(icon: Icon(Icons.person), label: 'Hồ sơ'),
+          ],
         ),
       ),
     );
