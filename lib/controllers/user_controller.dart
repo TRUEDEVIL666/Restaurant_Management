@@ -86,6 +86,6 @@ class UserController extends Controller<User> {
 
   @override
   String getId(User item) {
-    return item.id ?? '';
+    return item.getId() ?? '';
   }
 }

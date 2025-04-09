@@ -13,6 +13,16 @@ abstract class Controller<T> {
     }
   }
 
+  Future<bool> addItemWithId(T item) async {
+    try {
+      await db.doc(getId(item)).set(toFirestore(item));
+      return true;
+    } catch (e) {
+      print('ERROR ADDING ITEM: $e');
+      return false;
+    }
+  }
+
   Future<T?> getItem(String id) async {
     try {
       DocumentSnapshot doc = await db.doc(id).get();
@@ -23,7 +33,7 @@ abstract class Controller<T> {
     }
   }
 
-  Future<List<T>> getItems() async {
+  Future<List<T>> getAll() async {
     try {
       QuerySnapshot querySnapshot = await db.get();
       return querySnapshot.docs.map((doc) {

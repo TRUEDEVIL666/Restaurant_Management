@@ -26,6 +26,6 @@ class Menu {
   }
 
   Map<String, dynamic> toFirestore() {
-    return {'id': id, 'isCombo': isCombo, 'price': price, 'foodList': foodList};
+    return {'isCombo': isCombo, 'price': price, 'foodList': foodList};
   }
 }

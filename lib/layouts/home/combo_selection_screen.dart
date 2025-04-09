@@ -1,258 +1,388 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
-import 'package:restaurant_management/layouts/home/table_detail_screen.dart';
-import 'package:restaurant_management/models/table.dart';
-import 'package:shared_preferences/shared_preferences.dart';
+import 'package:restaurant_management/layouts/menu/menu_screen.dart';
 
 class ComboSelectionScreen extends StatefulWidget {
-  final RestaurantTable table;
+  final int tableNumber;
+  final Function(int) onCloseTable;
 
-  const ComboSelectionScreen({super.key, required this.table});
+  const ComboSelectionScreen({
+    Key? key,
+    required this.tableNumber,
+    required this.onCloseTable,
+  }) : super(key: key);
 
   @override
   State<ComboSelectionScreen> createState() => _ComboSelectionScreenState();
 }
 
 class _ComboSelectionScreenState extends State<ComboSelectionScreen> {
-  Map<String, int> selectedCombos = {};
-  Map<int, int> selectedTicketCounts = {};
-  DateTime tableOpenTime = DateTime.now();
+  String? selectedMealType; // 'buffet' hoặc 'order'
+  bool mealTypeLocked = false;
+  String selectedBuffetCombo = 'combo1'; // mặc định
+  int buffetQuantity = 1;
+  bool useDrinkCombo = true; // Mặc định có dùng combo nước
+  bool buffetOptionsLocked = false;
 
-  List<String> drinkCombos = ['Combo 1', 'Combo 2', 'Combo 3'];
-  List<int> ticketPrices = [219, 259, 299];
+  Map<String, List<String>> comboIncludedDishes = {
+    'combo1': ['Bò Mỹ', 'Gà rán', 'Salad'],
+    'combo2': ['Bò Mỹ', 'Gà rán', 'Salad', 'Hải sản'],
+    'combo3': ['Bò Mỹ', 'Gà rán', 'Salad', 'Hải sản', 'Lẩu thái'],
+  };
+  List<Map<String, dynamic>> allDishes = [
+    {'name': 'Bò Mỹ', 'price': 50},
+    {'name': 'Gà rán', 'price': 40},
+    {'name': 'Salad', 'price': 30},
+    {'name': 'Hải sản', 'price': 60},
+    {'name': 'Lẩu thái', 'price': 70},
+    {'name': 'Coca', 'price': 20},
+  ];
 
   @override
   void initState() {
     super.initState();
-    _loadSavedSelections();
+    _loadMealTypeFromFirestore();
   }
 
-  Future<void> _loadSavedSelections() async {
-    final prefs = await SharedPreferences.getInstance();
-    final tableKey = 'table_${widget.table.id}';
+  Future<void> _loadMealTypeFromFirestore() async {
+    final doc =
+        await FirebaseFirestore.instance
+            .collection('tables')
+            .doc('table_${widget.tableNumber}')
+            .get();
 
-    setState(() {
-      final savedTimeMillis = prefs.getInt('${tableKey}_openTime');
-      if (savedTimeMillis != null) {
-        tableOpenTime = DateTime.fromMillisecondsSinceEpoch(savedTimeMillis);
+    if (doc.exists) {
+      final data = doc.data()!;
+      final mealType = data['mealType'];
+      final locked = data['mealTypeLocked'] ?? false;
+
+      if (mealType == 'order' && locked) {
+        // 👉 Nếu là gọi món và đã lock, chuyển luôn sang menu
+        Future.microtask(() {
+          Navigator.pushReplacement(
+            context,
+            MaterialPageRoute(
+              builder:
+                  (context) => MenuScreen(
+                    tableNumber: widget.tableNumber,
+                    includedDishes: [], // gọi món không có món bao gồm
+                  ),
+            ),
+          );
+        });
+      } else {
+        // 👇 Nếu là buffet hoặc chưa xác nhận
+        setState(() {
+          selectedMealType = mealType;
+          mealTypeLocked = locked;
+          selectedBuffetCombo = data['buffetCombo'] ?? 'combo1';
+          buffetQuantity = data['buffetQuantity'] ?? 1;
+          useDrinkCombo = data['useDrinkCombo'] ?? true;
+          buffetOptionsLocked = data['buffetOptionsLocked'] ?? false;
+        });
       }
-
-      for (var combo in drinkCombos) {
-        selectedCombos[combo] = prefs.getInt('${tableKey}_combo_$combo') ?? 0;
-      }
-      for (var price in ticketPrices) {
-        selectedTicketCounts[price] =
-            prefs.getInt('${tableKey}_ticket_$price') ?? 0;
-      }
-    });
+    }
   }
 
-  Future<void> _saveSelections() async {
-    final prefs = await SharedPreferences.getInstance();
-    final tableKey = 'table_${widget.table}';
-
-    await prefs.setInt(
-      '${tableKey}_openTime',
-      tableOpenTime.millisecondsSinceEpoch,
-    );
-
-    selectedCombos.forEach((combo, count) {
-      prefs.setInt('${tableKey}_combo_$combo', count);
-    });
-    selectedTicketCounts.forEach((price, count) {
-      prefs.setInt('${tableKey}_ticket_$price', count);
-    });
+  Future<void> _saveMealTypeToFirestore() async {
+    await FirebaseFirestore.instance
+        .collection('tables')
+        .doc('table_${widget.tableNumber}')
+        .set({
+          'mealType': selectedMealType,
+          'mealTypeLocked': true,
+          'updatedAt': FieldValue.serverTimestamp(),
+        }, SetOptions(merge: true));
   }
 
-  Future<void> _saveSelectionsToFirestore() async {
-    final tableNumber = widget.table.toString();
-    final firestore = FirebaseFirestore.instance;
-
-    // Tạo billId dạng "bill_tableNumber_timestamp"
-    String billId =
-        'bill_${widget.table}_${DateTime.now().millisecondsSinceEpoch}';
-
-    // Tạo document bill mới trong "bills"
-    final billRef = firestore.collection('bills').doc(billId);
-
-    Map<String, int> ticketCountsStringKey = selectedTicketCounts.map(
-      (key, value) => MapEntry(key.toString(), value),
-    );
-
-    await billRef.set({
-      'billId': billId,
-      'tableNumber': widget.table,
-      'openTime': tableOpenTime,
-      'combos': selectedCombos,
-      'tickets': ticketCountsStringKey,
-      'status': 'open',
-    });
-
-    // Ghi billId hiện tại vào tables/{tableNumber}
-    final tableRef = firestore.collection('tables').doc(tableNumber);
-
-    await tableRef.set({
-      'tableNumber': widget.table,
-      'openTime': tableOpenTime.millisecondsSinceEpoch,
-      'status': 'open',
-      'currentBillId': billId,
-    });
+  void _onMealTypeConfirm() async {
+    if (selectedMealType != null) {
+      await _saveMealTypeToFirestore();
+      setState(() {
+        mealTypeLocked = true;
+      });
+    }
   }
 
-  void _saveAndContinue() async {
-    await _saveSelections();
-    await _saveSelectionsToFirestore(); // 🔥 Ghi dữ liệu vào Firestore
-
-    Navigator.pushReplacement(
-      context,
-      MaterialPageRoute(
-        builder: (context) => TableDetailScreen(table: widget.table),
-      ),
+  void _onSubmit() async {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text('Đã lưu thông tin bàn ${widget.tableNumber}')),
     );
+    await FirebaseFirestore.instance
+        .collection('tables')
+        .doc('table_${widget.tableNumber}')
+        .set({
+          'mealType': selectedMealType,
+          'buffetCombo': selectedBuffetCombo,
+          'buffetQuantity': buffetQuantity,
+          'drinkCombo': 'comboDrink1',
+          'buffetOptionsLocked': true,
+          'mealTypeLocked': true,
+          'useDrinkCombo': useDrinkCombo,
+          'updatedAt': FieldValue.serverTimestamp(),
+        }, SetOptions(merge: true));
+    buffetOptionsLocked = true;
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text('Bàn ${widget.table} - Chọn Combo & Giá Vé')),
+      appBar: AppBar(title: Text('Bàn ${widget.tableNumber}')),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
-              'Thời gian mở bàn: ${_formatDateTime(tableOpenTime)}',
-              style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+              'Chọn kiểu ăn:',
+              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
             ),
-            SizedBox(height: 24),
-
-            Text('Chọn Combo Nước:', style: TextStyle(fontSize: 18)),
-            SizedBox(height: 8),
-            _buildDrinkComboSelection(),
-            SizedBox(height: 24),
-
-            Text('Chọn Giá Vé:', style: TextStyle(fontSize: 18)),
-            SizedBox(height: 8),
-            _buildTicketPriceSelection(),
-
-            Spacer(),
+            SizedBox(height: 12),
 
             Row(
               children: [
                 Expanded(
                   child: ElevatedButton(
-                    onPressed: () {
-                      Navigator.pop(context);
-                    },
+                    onPressed:
+                        mealTypeLocked
+                            ? null
+                            : () => setState(() => selectedMealType = 'buffet'),
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.grey,
+                      backgroundColor:
+                          selectedMealType == 'buffet'
+                              ? Colors.green
+                              : Colors.grey[300],
+                      foregroundColor:
+                          selectedMealType == 'buffet'
+                              ? Colors.white
+                              : Colors.black,
                       padding: EdgeInsets.symmetric(vertical: 16),
                     ),
-                    child: Text('Hủy'),
+                    child: Text('Buffet'),
                   ),
                 ),
                 SizedBox(width: 16),
                 Expanded(
                   child: ElevatedButton(
-                    onPressed: _saveAndContinue,
+                    onPressed:
+                        mealTypeLocked
+                            ? null
+                            : () => setState(() => selectedMealType = 'order'),
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.green,
+                      backgroundColor:
+                          selectedMealType == 'order'
+                              ? Colors.green
+                              : Colors.grey[300],
+                      foregroundColor:
+                          selectedMealType == 'order'
+                              ? Colors.white
+                              : Colors.black,
                       padding: EdgeInsets.symmetric(vertical: 16),
                     ),
-                    child: Text('Xác nhận'),
+                    child: Text('Gọi món'),
                   ),
                 ),
               ],
             ),
+
+            if (!mealTypeLocked) ...[
+              SizedBox(height: 16),
+              ElevatedButton.icon(
+                onPressed: selectedMealType != null ? _onMealTypeConfirm : null,
+                icon: Icon(Icons.lock),
+                label: Text('Xác nhận kiểu ăn'),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.blue,
+                  padding: EdgeInsets.symmetric(vertical: 14),
+                ),
+              ),
+            ] else ...[
+              SizedBox(height: 24),
+              Text(
+                'Đã chọn: ${selectedMealType == 'buffet' ? 'Buffet' : 'Gọi món'}',
+                style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+              ),
+              SizedBox(height: 16),
+
+              if (selectedMealType == 'buffet') _buildBuffetOptions(),
+              if (selectedMealType == 'order') _buildOrderOptions(),
+
+              Spacer(),
+              ElevatedButton(
+                onPressed: () async {
+                  if (selectedMealType == 'buffet') {
+                    // Lưu thông tin buffet
+                    await FirebaseFirestore.instance
+                        .collection('tables')
+                        .doc('table_${widget.tableNumber}')
+                        .set({
+                          'mealType': selectedMealType,
+                          'buffetCombo': selectedBuffetCombo,
+                          'buffetQuantity': buffetQuantity,
+                          'drinkCombo': 'comboDrink1',
+                          'useDrinkCombo': useDrinkCombo,
+                          'mealTypeLocked': true,
+                          'buffetOptionsLocked': true,
+                          'updatedAt': FieldValue.serverTimestamp(),
+                        }, SetOptions(merge: true));
+                  } else if (selectedMealType == 'order') {
+                    // Lưu thông tin gọi món
+                    await FirebaseFirestore.instance
+                        .collection('tables')
+                        .doc('table_${widget.tableNumber}')
+                        .set({
+                          'mealType': selectedMealType,
+                          'useDrinkCombo': useDrinkCombo,
+                          'mealTypeLocked': true,
+                          'buffetOptionsLocked': true,
+                          'updatedAt': FieldValue.serverTimestamp(),
+                        }, SetOptions(merge: true));
+                  }
+
+                  // Chuyển đến MenuScreen
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder:
+                          (context) => MenuScreen(
+                            tableNumber: widget.tableNumber,
+                            includedDishes:
+                                selectedMealType == 'buffet'
+                                    ? List<String>.from(
+                                      comboIncludedDishes[selectedBuffetCombo] ??
+                                          [],
+                                    )
+                                    : [],
+                          ),
+                    ),
+                  );
+                },
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.green,
+                  padding: EdgeInsets.symmetric(vertical: 16),
+                ),
+                child: Center(child: Text('Xác nhận & chuyển sang Menu')),
+              ),
+            ],
           ],
         ),
       ),
     );
   }
 
-  Widget _buildDrinkComboSelection() {
+  // 🥤 Với buffet: chọn combo nước + vé
+  Widget _buildBuffetOptions() {
     return Column(
-      children:
-          drinkCombos.map((combo) {
-            return Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Text(combo, style: TextStyle(fontSize: 16)),
-                Row(
-                  children: [
-                    IconButton(
-                      icon: Icon(Icons.remove_circle_outline),
-                      onPressed: () {
-                        setState(() {
-                          if (selectedCombos[combo]! > 0) {
-                            selectedCombos[combo] = selectedCombos[combo]! - 1;
-                          }
-                        });
-                      },
-                    ),
-                    Text(
-                      '${selectedCombos[combo]}',
-                      style: TextStyle(fontSize: 16),
-                    ),
-                    IconButton(
-                      icon: Icon(Icons.add_circle_outline),
-                      onPressed: () {
-                        setState(() {
-                          selectedCombos[combo] = selectedCombos[combo]! + 1;
-                        });
-                      },
-                    ),
-                  ],
-                ),
-              ],
-            );
-          }).toList(),
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          'Chọn combo buffet:',
+          style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+        ),
+        SizedBox(height: 12),
+        Column(
+          children: [
+            RadioListTile<String>(
+              title: Text('Combo Buffet 259'),
+              value: 'combo1',
+              groupValue: selectedBuffetCombo,
+              onChanged:
+                  buffetOptionsLocked
+                      ? null
+                      : (value) => setState(() => selectedBuffetCombo = value!),
+            ),
+            RadioListTile<String>(
+              title: Text('Combo Buffet 299'),
+              value: 'combo2',
+              groupValue: selectedBuffetCombo,
+              onChanged:
+                  buffetOptionsLocked
+                      ? null
+                      : (value) => setState(() => selectedBuffetCombo = value!),
+            ),
+            RadioListTile<String>(
+              title: Text('Combo Buffet 359'),
+              value: 'combo3',
+              groupValue: selectedBuffetCombo,
+              onChanged:
+                  buffetOptionsLocked
+                      ? null
+                      : (value) => setState(() => selectedBuffetCombo = value!),
+            ),
+          ],
+        ),
+
+        SizedBox(height: 16),
+        Text('Số lượng người dùng buffet:', style: TextStyle(fontSize: 16)),
+        SizedBox(height: 8),
+        Row(
+          children: [
+            IconButton(
+              icon: Icon(Icons.remove),
+              onPressed:
+                  buffetQuantity > 1
+                      ? () => setState(() => buffetQuantity--)
+                      : null,
+            ),
+            Text('$buffetQuantity', style: TextStyle(fontSize: 18)),
+            IconButton(
+              icon: Icon(Icons.add),
+              onPressed: () => setState(() => buffetQuantity++),
+            ),
+          ],
+        ),
+
+        SizedBox(height: 16),
+        Row(
+          children: [
+            Checkbox(
+              value: useDrinkCombo,
+              onChanged:
+                  buffetOptionsLocked
+                      ? null
+                      : (value) =>
+                          setState(() => useDrinkCombo = value ?? true),
+            ),
+            SizedBox(width: 8),
+            Text(
+              'Dùng combo nước đi kèm',
+              style: TextStyle(fontSize: 16, fontWeight: FontWeight.w500),
+            ),
+          ],
+        ),
+      ],
     );
   }
 
-  Widget _buildTicketPriceSelection() {
+  // 🍽 Với gọi món: chọn món
+  Widget _buildOrderOptions() {
     return Column(
-      children:
-          ticketPrices.map((price) {
-            return Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Text('${price}K VND', style: TextStyle(fontSize: 16)),
-                Row(
-                  children: [
-                    IconButton(
-                      icon: Icon(Icons.remove_circle_outline),
-                      onPressed: () {
-                        setState(() {
-                          if (selectedTicketCounts[price]! > 0) {
-                            selectedTicketCounts[price] =
-                                selectedTicketCounts[price]! - 1;
-                          }
-                        });
-                      },
-                    ),
-                    Text(
-                      '${selectedTicketCounts[price]}',
-                      style: TextStyle(fontSize: 16),
-                    ),
-                    IconButton(
-                      icon: Icon(Icons.add_circle_outline),
-                      onPressed: () {
-                        setState(() {
-                          selectedTicketCounts[price] =
-                              selectedTicketCounts[price]! + 1;
-                        });
-                      },
-                    ),
-                  ],
-                ),
-              ],
-            );
-          }).toList(),
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        SizedBox(height: 16),
+        Row(
+          children: [
+            Checkbox(
+              value: useDrinkCombo,
+              onChanged: (value) {
+                setState(() {
+                  useDrinkCombo = value ?? true;
+                });
+              },
+            ),
+            SizedBox(width: 8),
+            Text(
+              'Dùng combo nước đi kèm',
+              style: TextStyle(fontSize: 16, fontWeight: FontWeight.w500),
+            ),
+          ],
+        ),
+        SizedBox(height: 12),
+        Text(
+          'Nhấn "Xác nhận & chuyển sang Menu" để tiếp tục.',
+          style: TextStyle(fontSize: 14, fontStyle: FontStyle.italic),
+        ),
+      ],
     );
-  }
-
-  String _formatDateTime(DateTime dateTime) {
-    return '${dateTime.hour}:${dateTime.minute.toString().padLeft(2, '0')} - ${dateTime.day}/${dateTime.month}/${dateTime.year}';
   }
 }

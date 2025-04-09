@@ -74,4 +74,6 @@ class User {
         'phoneNumber: $phoneNumber, '
         'loginHistory: $loginHistory}';
   }
+
+  getId() {}
 }

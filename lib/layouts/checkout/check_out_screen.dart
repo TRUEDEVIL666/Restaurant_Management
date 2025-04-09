@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import '../../services/qr_generator.dart';
+
 void main() {
   runApp(const MyApp());
 }
@@ -18,20 +20,30 @@ class MyApp extends StatelessWidget {
         ), // Example color scheme
         visualDensity: VisualDensity.adaptivePlatformDensity,
       ),
-      home: const CheckOutScreen(), // Show the checkout screen directly
+      home: CheckOutScreen(), // Show the checkout screen directly
       debugShowCheckedModeBanner: false,
     );
   }
 }
 
 class CheckOutScreen extends StatefulWidget {
-  const CheckOutScreen({Key? key}) : super(key: key);
+  const CheckOutScreen({super.key});
 
   @override
   State<CheckOutScreen> createState() => _CheckOutScreenState();
 }
 
 class _CheckOutScreenState extends State<CheckOutScreen> {
+  int selectedIndex = -1;
+  bool showQR = false;
+
+  void updateChoiceChip(int selected) {
+    setState(() {
+      selectedIndex = selected;
+      showQR = selectedIndex == 2;
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     final textTheme = Theme.of(context).textTheme;
@@ -45,22 +57,25 @@ class _CheckOutScreenState extends State<CheckOutScreen> {
                 .surfaceContainerHighest, // A slightly different AppBar color
         elevation: 1,
       ),
-      body: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            // --- Order Items Section ---
-            Text('Order Items', style: textTheme.headlineSmall),
-            const SizedBox(height: 8),
-            Expanded(
-              flex: 3, // Give more space to items list
-              child: Card(
+      body: SingleChildScrollView(
+        // Wrap the entire body content in SingleChildScrollView
+        child: Padding(
+          padding: const EdgeInsets.all(16.0),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              // --- Order Items Section ---
+              Text('Order Items', style: textTheme.headlineSmall),
+              const SizedBox(height: 8),
+
+              // Wrap the Card with ListView for scrollable items
+              Card(
                 elevation: 2,
                 clipBehavior:
                     Clip.antiAlias, // Ensures decoration respects border radius
                 child: ListView(
-                  // Simple ListView for static UI
+                  shrinkWrap:
+                      true, // Ensure the ListView doesn't take more space than needed
                   padding: const EdgeInsets.symmetric(vertical: 8.0),
                   children: const [
                     _ItemTile(
@@ -80,153 +95,158 @@ class _CheckOutScreenState extends State<CheckOutScreen> {
                   ],
                 ),
               ),
-            ),
-            const SizedBox(height: 16),
+              const SizedBox(height: 16),
 
-            // --- Summary Section ---
-            Card(
-              elevation: 2,
-              child: Padding(
-                padding: const EdgeInsets.all(16.0),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
+              // --- Summary Section ---
+              Card(
+                elevation: 2,
+                child: Padding(
+                  padding: const EdgeInsets.all(16.0),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text('Bill Summary', style: textTheme.titleLarge),
+                      const Divider(height: 20),
+                      _buildSummaryRow(textTheme, 'Subtotal:', '\$56.99'),
+                      _buildSummaryRow(textTheme, 'Tax (GST 5%):', '+\$2.85'),
+                      _buildSummaryRow(
+                        textTheme,
+                        'Service Charge (10%):',
+                        '+\$5.70',
+                      ),
+                      _buildSummaryRow(
+                        textTheme,
+                        'Discount:',
+                        '-\$5.00',
+                        valueColor: Colors.orange[700],
+                      ),
+                      const Divider(height: 20),
+                      _buildSummaryRow(
+                        textTheme,
+                        'Grand Total:',
+                        '\$60.54',
+                        isTotal: true,
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+              const SizedBox(height: 16),
+
+              // --- Payment Method Selection (Visual Only) ---
+              Text('Select Payment Method', style: textTheme.titleMedium),
+              const SizedBox(height: 8),
+              Wrap(
+                spacing: 8.0,
+                runSpacing: 4.0,
+                children: [
+                  ChoiceChip(
+                    label: const Text('Cash'),
+                    selected: selectedIndex == 0,
+                    onSelected: (selected) {
+                      updateChoiceChip(0);
+                    },
+                    selectedColor: colorScheme.primaryContainer,
+                    avatar: Icon(Icons.money, color: Colors.green[700]),
+                  ),
+                  ChoiceChip(
+                    label: const Text('Card'),
+                    selected: selectedIndex == 1,
+                    onSelected: (selected) {
+                      updateChoiceChip(1);
+                    },
+                    avatar: Icon(Icons.credit_card, color: Colors.blue[700]),
+                  ),
+                  ChoiceChip(
+                    label: const Text('UPI/QR'),
+                    selected: selectedIndex == 2,
+                    onSelected: (selected) {
+                      updateChoiceChip(2);
+                    },
+                    avatar: Icon(Icons.qr_code, color: Colors.deepPurple[400]),
+                  ),
+                  ChoiceChip(
+                    label: const Text('Online'),
+                    selected: selectedIndex == 3,
+                    onSelected: (selected) {
+                      updateChoiceChip(3);
+                    },
+                    avatar: Icon(Icons.language, color: Colors.teal[400]),
+                  ),
+                ],
+              ),
+
+              showQR
+                  ? const QRGeneratorWidget()
+                  : const SizedBox(), // Show QR only if selected
+
+              const SizedBox(height: 16), // Add some space before buttons
+              // --- Action Buttons ---
+              Padding(
+                padding: const EdgeInsets.only(
+                  bottom: 8.0,
+                ), // Add some bottom padding before buttons
+                child: Wrap(
+                  spacing: 10.0,
+                  alignment: WrapAlignment.center,
+                  runSpacing: 10.0,
                   children: [
-                    Text('Bill Summary', style: textTheme.titleLarge),
-                    const Divider(height: 20),
-                    _buildSummaryRow(textTheme, 'Subtotal:', '\$56.99'),
-                    _buildSummaryRow(textTheme, 'Tax (GST 5%):', '+\$2.85'),
-                    _buildSummaryRow(
-                      textTheme,
-                      'Service Charge (10%):',
-                      '+\$5.70',
+                    // Apply Discount (Manager only?)
+                    OutlinedButton.icon(
+                      icon: const Icon(Icons.discount_outlined),
+                      label: const Text('Apply Discount'),
+                      onPressed: () {
+                        /* No-op */
+                      },
+                      style: OutlinedButton.styleFrom(
+                        foregroundColor: Colors.orange[800],
+                        side: BorderSide(color: Colors.orange[300]!),
+                      ),
                     ),
-                    _buildSummaryRow(
-                      textTheme,
-                      'Discount:',
-                      '-\$5.00',
-                      valueColor: Colors.orange[700],
+
+                    // Print Bill/Receipt Button
+                    OutlinedButton.icon(
+                      icon: const Icon(Icons.print_outlined),
+                      label: const Text('Print Bill'),
+                      onPressed: () {
+                        /* No-op */
+                      },
                     ),
-                    const Divider(height: 20),
-                    _buildSummaryRow(
-                      textTheme,
-                      'Grand Total:',
-                      '\$60.54',
-                      isTotal: true,
+
+                    // Void Order (Manager only)
+                    OutlinedButton.icon(
+                      icon: const Icon(Icons.cancel_outlined),
+                      label: const Text('Void Bill'),
+                      onPressed: () {
+                        /* No-op */
+                      },
+                      style: OutlinedButton.styleFrom(
+                        foregroundColor: colorScheme.error,
+                        side: BorderSide(color: colorScheme.errorContainer),
+                      ),
+                    ),
+
+                    // Process Payment Button (Primary Action)
+                    ElevatedButton.icon(
+                      icon: const Icon(Icons.payment),
+                      label: const Text('Process Payment'),
+                      onPressed: () {
+                        /* No-op */
+                      },
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.green[600],
+                        foregroundColor: Colors.white,
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 24,
+                          vertical: 12,
+                        ),
+                      ),
                     ),
                   ],
                 ),
               ),
-            ),
-            const SizedBox(height: 16),
-
-            // --- Payment Method Selection (Visual Only) ---
-            Text('Select Payment Method', style: textTheme.titleMedium),
-            const SizedBox(height: 8),
-            Wrap(
-              spacing: 8.0,
-              runSpacing: 4.0,
-              children: [
-                ChoiceChip(
-                  label: const Text('Cash'),
-                  selected: true, // Example: Cash is selected
-                  onSelected: (selected) {
-                    // No-op: UI only
-                  },
-                  selectedColor: colorScheme.primaryContainer,
-                  avatar: Icon(Icons.money, color: Colors.green[700]),
-                ),
-                ChoiceChip(
-                  label: const Text('Card'),
-                  selected: false,
-                  onSelected: (selected) {
-                    // No-op: UI only
-                  },
-                  avatar: Icon(Icons.credit_card, color: Colors.blue[700]),
-                ),
-                ChoiceChip(
-                  label: const Text('UPI/QR'),
-                  selected: false,
-                  onSelected: (selected) {
-                    // No-op: UI only
-                  },
-                  avatar: Icon(Icons.qr_code, color: Colors.deepPurple[400]),
-                ),
-                ChoiceChip(
-                  label: const Text('Online'),
-                  selected: false,
-                  onSelected: (selected) {
-                    // No-op: UI only
-                  },
-                  avatar: Icon(Icons.language, color: Colors.teal[400]),
-                ),
-              ],
-            ),
-            const Spacer(), // Pushes buttons to the bottom
-            // --- Action Buttons ---
-            Padding(
-              padding: const EdgeInsets.only(
-                bottom: 8.0,
-              ), // Add some bottom padding before buttons
-              child: Wrap(
-                spacing: 10.0,
-                alignment: WrapAlignment.center,
-                runSpacing: 10.0,
-                children: [
-                  // Apply Discount (Manager only?)
-                  OutlinedButton.icon(
-                    icon: const Icon(Icons.discount_outlined),
-                    label: const Text('Apply Discount'),
-                    onPressed: () {
-                      /* No-op */
-                    },
-                    style: OutlinedButton.styleFrom(
-                      foregroundColor: Colors.orange[800],
-                      side: BorderSide(color: Colors.orange[300]!),
-                    ),
-                  ),
-
-                  // Print Bill/Receipt Button
-                  OutlinedButton.icon(
-                    icon: const Icon(Icons.print_outlined),
-                    label: const Text('Print Bill'),
-                    onPressed: () {
-                      /* No-op */
-                    },
-                  ),
-
-                  // Void Order (Manager only)
-                  OutlinedButton.icon(
-                    icon: const Icon(Icons.cancel_outlined),
-                    label: const Text('Void Bill'),
-                    onPressed: () {
-                      /* No-op */
-                    },
-                    style: OutlinedButton.styleFrom(
-                      foregroundColor: colorScheme.error,
-                      side: BorderSide(color: colorScheme.errorContainer),
-                    ),
-                  ),
-
-                  // Process Payment Button (Primary Action)
-                  ElevatedButton.icon(
-                    icon: const Icon(Icons.payment),
-                    label: const Text('Process Payment'),
-                    onPressed: () {
-                      /* No-op */
-                    },
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.green[600],
-                      foregroundColor: Colors.white,
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 24,
-                        vertical: 12,
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );
