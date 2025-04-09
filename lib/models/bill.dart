@@ -1,22 +1,46 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
+
 class Bill {
-  final String id;
-  bool status;
-  List<Map<String, dynamic>>? orders;
-  int tableId;
+  final String? id;
+  String status;
+  int tableNumber;
+  Timestamp timestamp;
 
   Bill({
-    required this.id,
+    this.id,
     required this.status,
-    List<Map<String, dynamic>>? orders,
-    required this.tableId,
-  }) : orders = orders ?? [];
+    required this.tableNumber,
+    required this.timestamp,
+  });
 
-  factory Bill.toObject(String docId, Map<String, dynamic> doc) {
+  // Standard factory constructor from Firestore DocumentSnapshot
+  factory Bill.toObject(DocumentSnapshot doc) {
     return Bill(
-      id: docId,
+      id: doc.id,
       status: doc['status'],
-      orders: List<Map<String, dynamic>>.from(doc['orders']),
-      tableId: doc['tableId'],
+      tableNumber: doc['tableNumber'],
+      timestamp: doc['timestamp'],
     );
+  }
+
+  Map<String, dynamic> toFirestore() {
+    return {
+      'status': status,
+      'tableNumber': tableNumber,
+      'timestamp': timestamp,
+    };
+  }
+
+  Map<String, dynamic> toFirestoreForAdd() {
+    return {
+      'status': status,
+      'tableNumber': tableNumber,
+      'timestamp': Timestamp.now(),
+    };
+  }
+
+  @override
+  String toString() {
+    return 'Bill{id: $id, status: $status, tableNumber: $tableNumber, timestamp: $timestamp}';
   }
 }
