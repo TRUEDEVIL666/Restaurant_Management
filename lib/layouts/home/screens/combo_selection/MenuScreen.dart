@@ -138,61 +138,60 @@ class _MenuScreenState extends State<MenuScreen> {
     child: Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        Expanded(
-          flex: 4,
-          child: ClipRRect(
-            borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
-            child: Image.network(
-              image,
-              fit: BoxFit.cover,
-              errorBuilder: (context, error, stackTrace) => Container(
-                color: Colors.grey[300],
-                child: Icon(Icons.fastfood, size: 40),
-              ),
+        // Hình ảnh (đặt chiều cao cụ thể thay vì Expanded)
+        ClipRRect(
+          borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
+          child: Image.network(
+            image,
+            height: 200,
+            fit: BoxFit.cover,
+            errorBuilder: (context, error, stackTrace) => Container(
+              color: Colors.grey[300],
+              height: 100,
+              child: Icon(Icons.fastfood, size: 40),
             ),
           ),
         ),
-        Expanded(
-          flex: 1,
-          child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 6),
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Text(
-                  name,
-                  style: TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.w600,
+        // Phần nội dung
+        Padding(
+          padding: const EdgeInsets.all(8),
+          child: Column(
+            children: [
+              Text(
+                name,
+                style: TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.w600,
+                ),
+                textAlign: TextAlign.center,
+              ),
+              SizedBox(height: 6),
+              Text(
+                isIncluded ? 'Đã bao gồm' : '$price k',
+                style: TextStyle(
+                  fontSize: 13,
+                  color: isIncluded ? Colors.green : Colors.black,
+                ),
+              ),
+              SizedBox(height: 8),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  IconButton(
+                    icon: Icon(Icons.remove_circle_outline, size: 22),
+                    onPressed: () => updateQuantity(name, -1),
                   ),
-                  textAlign: TextAlign.center,
-                ),
-                Text(
-                  isIncluded ? 'Đã bao gồm' : '$price k',
-                  style: TextStyle(
-                    fontSize: 13,
-                    color: isIncluded ? Colors.green : Colors.black,
+                  Text(
+                    '$quantity',
+                    style: TextStyle(fontSize: 16),
                   ),
-                ),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    IconButton(
-                      icon: Icon(Icons.remove_circle_outline, size: 22),
-                      onPressed: () => updateQuantity(name, -1),
-                    ),
-                    Text(
-                      '$quantity',
-                      style: TextStyle(fontSize: 16),
-                    ),
-                    IconButton(
-                      icon: Icon(Icons.add_circle_outline, size: 22),
-                      onPressed: () => updateQuantity(name, 1),
-                    ),
-                  ],
-                ),
-              ],
-            ),
+                  IconButton(
+                    icon: Icon(Icons.add_circle_outline, size: 22),
+                    onPressed: () => updateQuantity(name, 1),
+                  ),
+                ],
+              ),
+            ],
           ),
         ),
       ],
@@ -206,16 +205,25 @@ class _MenuScreenState extends State<MenuScreen> {
       appBar: AppBar(title: Text('Đặt món - Bàn ${widget.tableNumber}')),
       body: Padding(
         padding: const EdgeInsets.all(8.0),
-        child: GridView.count(
-          crossAxisCount: 4,
-          crossAxisSpacing: 12,
-          mainAxisSpacing: 6,
-          childAspectRatio: 0.75,
-          children: allDishes.map((dish) => buildDishCard(dish)).toList(),
-        ),
+        child: GridView.builder(
+  gridDelegate: SliverGridDelegateWithMaxCrossAxisExtent(
+    maxCrossAxisExtent: 200, // mỗi item tối đa 200px ngang
+    crossAxisSpacing: 12,
+    mainAxisSpacing: 6,
+    childAspectRatio: 0.75,
+  ),
+  itemCount: allDishes.length,
+  itemBuilder: (context, index) {
+    return buildDishCard(allDishes[index]);
+  },
+)
+
       ),
       bottomNavigationBar: Padding(
-        padding: const EdgeInsets.all(12.0),
+  padding: const EdgeInsets.all(12.0),
+  child: Row(
+    children: [
+      Expanded(
         child: ElevatedButton(
           onPressed: submitOrder,
           style: ElevatedButton.styleFrom(
@@ -224,10 +232,32 @@ class _MenuScreenState extends State<MenuScreen> {
           ),
           child: Text(
             'Xác nhận đặt món',
-            style: TextStyle(fontSize: 18),
+            style: TextStyle(fontSize: 16),
           ),
         ),
       ),
-    );
+      SizedBox(width: 12),
+      Expanded(
+        child: ElevatedButton(
+          onPressed: () {
+            // TODO: xử lý logic thanh toán tại đây
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(content: Text('Chức năng thanh toán đang phát triển')),
+            );
+          },
+          style: ElevatedButton.styleFrom(
+            padding: EdgeInsets.symmetric(vertical: 16),
+            backgroundColor: Colors.redAccent,
+          ),
+          child: Text(
+            'Thanh toán',
+            style: TextStyle(fontSize: 16),
+          ),
+        ),
+      ),
+    ],
+  ),
+),
+ );
   }
 }
