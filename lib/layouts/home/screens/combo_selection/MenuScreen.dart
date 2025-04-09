@@ -207,8 +207,8 @@ class _MenuScreenState extends State<MenuScreen> {
       body: Padding(
         padding: const EdgeInsets.all(8.0),
         child: GridView.count(
-          crossAxisCount: 3,
-          crossAxisSpacing: 6,
+          crossAxisCount: 4,
+          crossAxisSpacing: 12,
           mainAxisSpacing: 6,
           childAspectRatio: 0.75,
           children: allDishes.map((dish) => buildDishCard(dish)).toList(),

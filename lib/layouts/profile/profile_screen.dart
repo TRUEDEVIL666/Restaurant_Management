@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:qr_flutter/qr_flutter.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class ProfileScreen extends StatefulWidget {
@@ -135,10 +136,35 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 child: Text('Cập nhật mật khẩu'),
               ),
             ),
-          ],
+            SizedBox(height: 24),
+Center(
+  child: Column(
+    children: [
+      Text('Mã QR của bạn:', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+      SizedBox(height: 8),
+      Container(
+        decoration: BoxDecoration(
+          border: Border.all(color: Colors.grey),
+          borderRadius: BorderRadius.circular(12),
+        ),
+        padding: EdgeInsets.all(12),
+        child: QrImageView(
+          data: '${_username}|${_userEmail}', // hoặc chỉ userId nếu bạn có
+          version: QrVersions.auto,
+          size: 160,
         ),
       ),
+    ],
+  ),
+),
+
+          ],
+          
+        ),
+        
+      ),
     );
+    
   }
 
   void _changePassword() async {

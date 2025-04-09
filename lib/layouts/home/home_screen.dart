@@ -28,6 +28,8 @@ class _HomeScreenState extends State<HomeScreen> {
     });
   }
 
+
+//Truy cập firestore để kiểm tra bàn nào đang mở đang đóng thì hiện lại(Dành cho trường hợp reset lại app)
   Future<void> _loadOpenedTables() async {
     final snapshot = await FirebaseFirestore.instance.collection('tables').get();
     final newTableStatus = <int, bool>{};
@@ -47,6 +49,7 @@ class _HomeScreenState extends State<HomeScreen> {
     });
   }
 
+//Hàm đóng bàn nhưng chưa sử dụng có thể bỏ qua được
   Future<void> _closeTable(int tableNumber) async {
     final prefs = await SharedPreferences.getInstance();
     final tableKey = 'table_$tableNumber';
@@ -75,6 +78,8 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
+
+//Hàm này liên quan tới hàm đóng bàn, công dụng chính là sẽ hiện thông báo có chắc chắn đóng bàn khi đã thanh toán rồi không
   void _showCloseTableDialog(BuildContext context, int tableNumber) {
     if (!(tableStatus[tableNumber] ?? false)) {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -105,6 +110,8 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
+
+//Hàm này dùng để khi mở 1 bàn thì hiện lên thông báo có chắc chắn muốn mở không, nếu đã mở thì truy cập firestore để thay đổi biến status từ close sang open
   void _showConfirmationDialog(BuildContext context, int tableNumber) {
     showDialog(
       context: context,
@@ -137,6 +144,7 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
+//Hàm này sau khi chọn mở bàn thì di chuyển tới trang comboselection screen để chọn loại ăn buffet hoặc gọi món
   void _navigateToDetailScreen(BuildContext context, int tableNumber) {
     Navigator.push(
       context,
@@ -153,6 +161,7 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
+//Hàm này để xây dựng ra UI bàn(tui đang cho bàn 1 - 10)
   Widget _buildTableGrid() {
     return GridView.builder(
       padding: EdgeInsets.all(10.0),
