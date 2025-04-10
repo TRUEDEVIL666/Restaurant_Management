@@ -3,20 +3,19 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 
 class User {
   final String? id;
-  String username, password, email, phoneNumber;
-  bool isManager;
-  List<Timestamp>? loginHistory;
+  String username, password, email, phoneNumber, role;
+  List<Timestamp> loginHistory;
 
   User({
     this.id,
     required this.username,
     required String password,
-    bool? isManager,
+    String? role,
     required this.email,
     required this.phoneNumber,
     List<Timestamp>? loginHistory,
   }) : password = hashPassword(password),
-       isManager = isManager ?? false,
+       role = role ?? "employee",
        loginHistory = loginHistory ?? [];
 
   User.fromMap({
@@ -25,16 +24,16 @@ class User {
     required this.password,
     required this.email,
     required this.phoneNumber,
-    required this.isManager,
+    required this.role,
     required this.loginHistory,
   });
 
-  factory User.fromFirestore(String docId, Map<String, dynamic> doc) {
+  factory User.toObject(DocumentSnapshot doc) {
     return User.fromMap(
-      id: docId,
+      id: doc.id,
       username: doc['username'],
       password: doc['password'],
-      isManager: doc['isManager'],
+      role: doc['role'],
       email: doc['email'],
       phoneNumber: doc['phoneNumber'],
       loginHistory: List<Timestamp>.from(doc['loginHistory']),
@@ -45,7 +44,7 @@ class User {
     return {
       'username': username,
       'password': password,
-      'isManager': isManager,
+      'role': role,
       'email': email,
       'phoneNumber': phoneNumber,
       'loginHistory': loginHistory,
@@ -61,7 +60,7 @@ class User {
   }
 
   void addLoginHistory(Timestamp timestamp) {
-    loginHistory!.add(timestamp);
+    loginHistory.add(timestamp);
   }
 
   @override
@@ -70,9 +69,11 @@ class User {
         'id: $id, '
         'username: $username, '
         'password: $password, '
-        'isManager: $isManager'
+        'role: $role'
         'email: $email, '
         'phoneNumber: $phoneNumber, '
         'loginHistory: $loginHistory}';
   }
+
+  getId() {}
 }

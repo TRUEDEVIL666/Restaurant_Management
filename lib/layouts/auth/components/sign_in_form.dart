@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:restaurant_management/layouts/home/home_screen.dart';
 
 import '../../../constants.dart';
 import '../../../controllers/user_controller.dart';
 import '../../../models/user.dart';
+import '../../home/home_screen.dart';
 import '../forgot_password_screen.dart';
 
 class SignInForm extends StatefulWidget {
@@ -116,6 +116,9 @@ class _SignInFormState extends State<SignInForm> {
     );
 
     if (user != null) {
+      idController.clear();
+      passwordController.clear();
+
       Navigator.pushAndRemoveUntil(
         context,
         MaterialPageRoute(builder: (context) => const HomeScreen()),
