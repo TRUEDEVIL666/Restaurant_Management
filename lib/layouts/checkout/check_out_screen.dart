@@ -5,7 +5,6 @@ import 'package:restaurant_management/models/components/order.dart';
 import '../../controllers/bill_controller.dart'; // Adjust path
 // Import your models and controller
 import '../../models/bill.dart';
-import '../../services/qr_generator.dart'; // Assuming this exists
 
 class CheckOutScreen extends StatefulWidget {
   final int tableIndex;
@@ -348,9 +347,8 @@ class _CheckOutScreenState extends State<CheckOutScreen> {
                         ],
                       ),
 
-                      if (showQR)
-                        const QRGeneratorWidget(), // Use if keyword for cleaner conditional UI
-
+                      //TODO
+                      // if (showQR) const QRGeneratorWidget(),
                       const SizedBox(height: 16),
                       // --- Action Buttons ---
                       Padding(

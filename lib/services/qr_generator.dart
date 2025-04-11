@@ -1,12 +1,16 @@
 import 'package:flutter/material.dart';
 
 class QRGeneratorWidget extends StatelessWidget {
-  final int amount; // số tiền bill, ví dụ: 500000
-  final String bankCode = "VCB";
-  final String accountNumber = "1031400903";
-  final String accountName = "LUONG CANH PHONG";
+  final int amount;
+  final String bankCode, accountNumber, accountName;
 
-  const QRGeneratorWidget({super.key, this.amount = 50000});
+  const QRGeneratorWidget({
+    super.key,
+    required this.amount,
+    required this.bankCode,
+    required this.accountNumber,
+    required this.accountName,
+  });
 
   @override
   Widget build(BuildContext context) {
