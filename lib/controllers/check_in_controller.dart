@@ -1,6 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:restaurant_management/controllers/template_controller.dart';
-import 'package:restaurant_management/models/checkIn.dart';
+import 'package:restaurant_management/models/check_in.dart';
 
 class CheckInController extends Controller<CheckIn> {
   CheckInController._internal() {
@@ -12,7 +12,7 @@ class CheckInController extends Controller<CheckIn> {
 
   @override
   String getId(CheckIn item) {
-    return item.id ?? '';
+    return item.id!;
   }
 
   @override

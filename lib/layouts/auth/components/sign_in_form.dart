@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:restaurant_management/layouts/admin/admin_screen.dart';
+import 'package:restaurant_management/layouts/management/manager_screen.dart';
 
 import '../../../constants.dart';
 import '../../../controllers/user_controller.dart';
@@ -118,11 +120,18 @@ class _SignInFormState extends State<SignInForm> {
     if (user != null) {
       idController.clear();
       passwordController.clear();
-
+      Widget destination;
+      if (user.role == 'admin') {
+        destination = AdminDashboardScreen();
+      } else if (user.role == 'manager') {
+        destination = const ManagerDashboardScreen();
+      } else {
+        destination = const HomeScreen();
+      }
       Navigator.pushAndRemoveUntil(
         context,
-        MaterialPageRoute(builder: (context) => const HomeScreen()),
-        (_) => true,
+        MaterialPageRoute(builder: (context) => destination),
+        (_) => false,
       );
     } else {
       ScaffoldMessenger.of(context).showSnackBar(

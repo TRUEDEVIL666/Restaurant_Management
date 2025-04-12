@@ -12,7 +12,7 @@ class BankController extends Controller<Bank> {
 
   @override
   String getId(Bank item) {
-    return item.accountName;
+    return item.id!;
   }
 
   @override

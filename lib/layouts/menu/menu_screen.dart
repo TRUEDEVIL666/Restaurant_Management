@@ -1,6 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
-import 'package:restaurant_management/layouts/checkout/check_out_screen.dart';
+import 'package:restaurant_management/controllers/bill_controller.dart';
+import 'package:restaurant_management/models/bill.dart';
 
 class MenuScreen extends StatefulWidget {
   final int tableNumber;
@@ -222,22 +223,24 @@ class _MenuScreenState extends State<MenuScreen> {
             SizedBox(width: 12),
             Expanded(
               child: ElevatedButton(
-                onPressed: () {
+                onPressed: () async {
                   // TODO: xử lý logic thanh toán tại đây
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder:
-                          (context) =>
-                              CheckOutScreen(tableIndex: widget.tableNumber),
-                    ),
+                  BillController billController = BillController();
+                  Bill? bill = await billController.getOpenBillByTableNumber(
+                    widget.tableNumber,
                   );
+                  if (bill != null) {
+                    billController.updateBillStatus(bill.id ?? '', 'requested');
+                  }
                 },
                 style: ElevatedButton.styleFrom(
                   padding: EdgeInsets.symmetric(vertical: 16),
-                  backgroundColor: Colors.redAccent,
+                  backgroundColor: Colors.blueAccent,
                 ),
-                child: Text('Thanh toán', style: TextStyle(fontSize: 16)),
+                child: Text(
+                  'Yêu cầu thanh toán',
+                  style: TextStyle(fontSize: 16),
+                ),
               ),
             ),
           ],

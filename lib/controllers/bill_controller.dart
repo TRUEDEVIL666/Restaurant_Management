@@ -15,7 +15,7 @@ class BillController extends Controller<Bill> {
 
   @override
   String getId(Bill item) {
-    return item.id ?? '';
+    return item.id!;
   }
 
   @override
@@ -24,11 +24,37 @@ class BillController extends Controller<Bill> {
   }
 
   @override
-  Bill toObject(DocumentSnapshot<Object?> doc) {
+  Bill toObject(DocumentSnapshot doc) {
     if (doc.data() != null) {
       return Bill.toObject(doc as DocumentSnapshot<Map<String, dynamic>>);
     } else {
       throw Exception("Document data was null for doc ID: ${doc.id}");
+    }
+  }
+
+  Stream<List<Bill>> getRequestedBillsStream() {
+    try {
+      return db
+          .where('status', isEqualTo: 'requested') // Filter by status
+          .orderBy('timestamp', descending: false) // Oldest requests first
+          .snapshots() // Get the stream of query snapshots
+          .map((querySnapshot) {
+            // Map the stream
+            // Convert each document snapshot to a Bill object
+            return querySnapshot.docs.map((doc) => toObject(doc)).toList();
+          })
+          .handleError((error) {
+            // Basic error handling for the stream
+            print("Error in requested bills stream: $error");
+            // Optionally emit an empty list or rethrow, depending on desired behavior
+            return <Bill>[];
+          });
+    } catch (e) {
+      print("Error setting up requested bills stream: $e");
+      // Return a stream that emits an error or an empty list immediately
+      return Stream.value(
+        <Bill>[],
+      ).handleError((_) => true); // Or Stream.error(e);
     }
   }
 
@@ -66,11 +92,22 @@ class BillController extends Controller<Bill> {
   }
 
   Future<Bill?> getOpenBillByTableNumber(int tableNumber) async {
+    return getStatusBillByTableNumber(tableNumber, "open");
+  }
+
+  Future<Bill?> getRequestedBillByTableNumber(int tableNumber) async {
+    return getStatusBillByTableNumber(tableNumber, "requested");
+  }
+
+  Future<Bill?> getStatusBillByTableNumber(
+    int tableNumber,
+    String status,
+  ) async {
     try {
       QuerySnapshot querySnapshot =
           await db
               .where('tableNumber', isEqualTo: tableNumber)
-              .where('status', isEqualTo: "open")
+              .where('status', isEqualTo: status)
               .limit(1)
               .get();
 

@@ -10,14 +10,16 @@ class TableController extends Controller<RestaurantTable> {
   static final _instance = TableController._internal();
   factory TableController() => _instance;
 
-  void switchTableState(RestaurantTable table) {
-    table.isOccupied = !table.isOccupied;
-    if (table.isOccupied) {
-      table.openTime = Timestamp.now();
-    } else {
-      table.openTime = null;
+  Future<bool> checkOutTable(int tableId) async {
+    RestaurantTable? table = await _instance.getItem(tableId.toString());
+
+    if (table != null) {
+      table.checkOut();
+      updateItem(table);
+      return true;
     }
-    updateItem(table);
+
+    return false;
   }
 
   @override
@@ -32,6 +34,6 @@ class TableController extends Controller<RestaurantTable> {
 
   @override
   String getId(RestaurantTable item) {
-    return item.id;
+    return item.id!;
   }
 }

@@ -1,48 +1,91 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 
 class RestaurantTable {
-  final String id;
-  String? currentBillId;
+  final String? id;
+  String? buffetCombo, mealType;
   bool isOccupied;
-  Timestamp? openTime;
+  bool? buffetOptionsLocked, mealTypeLocked, useDrinkCombo;
+  int? buffetQuantity;
+  Timestamp? openedAt;
 
   RestaurantTable({
-    required this.id,
-    this.currentBillId,
+    this.id,
+    this.buffetCombo,
+    this.mealType,
+    this.buffetOptionsLocked,
     bool? isOccupied,
-    this.openTime,
+    this.useDrinkCombo,
+    this.mealTypeLocked,
+    this.buffetQuantity,
+    this.openedAt,
   }) : isOccupied = isOccupied ?? false;
 
-  RestaurantTable.fromMap({
-    required this.id,
-    required this.currentBillId,
-    required this.isOccupied,
-    required this.openTime,
-  });
+  void checkOut() {
+    buffetCombo = null;
+    mealType = null;
+    buffetOptionsLocked = null;
+    isOccupied = false;
+    mealTypeLocked = null;
+    useDrinkCombo = null;
+    buffetQuantity = null;
+    openedAt = null;
+  }
+
+  void checkIn(
+    String buffetCombo,
+    String mealType,
+    bool useDrinkCombo,
+    int buffetQuantity,
+    bool mealTypeLocked,
+    bool buffetOptionsLocked,
+  ) {
+    this.buffetCombo = buffetCombo;
+    this.mealType = mealType;
+    this.useDrinkCombo = useDrinkCombo;
+    this.buffetQuantity = buffetQuantity;
+    this.mealTypeLocked = mealTypeLocked;
+    this.buffetOptionsLocked = buffetOptionsLocked;
+    isOccupied = true;
+    openedAt = Timestamp.now();
+  }
 
   factory RestaurantTable.toObject(DocumentSnapshot doc) {
-    return RestaurantTable.fromMap(
+    return RestaurantTable(
       id: doc.id,
-      currentBillId: doc['currentBillId'],
+      buffetCombo: doc['buffetCombo'],
+      mealType: doc['mealType'],
+      buffetOptionsLocked: doc['buffetOptionsLocked'],
       isOccupied: doc['isOccupied'],
-      openTime: doc['openTime'],
+      useDrinkCombo: doc['useDrinkCombo'],
+      mealTypeLocked: doc['mealTypeLocked'],
+      buffetQuantity: doc['buffetQuantity'],
+      openedAt: doc['openedAt'],
     );
   }
 
   Map<String, dynamic> toFirestore() {
     return {
-      'currentBillId': currentBillId,
+      'buffetCombo': buffetCombo,
+      'mealType': mealType,
+      'buffetOptionsLocked': buffetOptionsLocked,
       'isOccupied': isOccupied,
-      'openTime': null,
+      'useDrinkCombo': useDrinkCombo,
+      'mealTypeLocked': mealTypeLocked,
+      'buffetQuantity': buffetQuantity,
+      'openedAt': openedAt,
     };
   }
 
   @override
   String toString() {
-    return 'Table{'
-        'id: $id, '
-        'currentBillId: $currentBillId, '
+    return 'RestaurantTable{id: $id, '
+        'buffetCombo: $buffetCombo, '
+        'mealType: $mealType, '
+        'buffetOptionsLocked: $buffetOptionsLocked, '
         'isOccupied: $isOccupied, '
-        'openTime: $openTime}';
+        'mealTypeLocked: $mealTypeLocked, '
+        'useDrinkCombo: $useDrinkCombo, '
+        'buffetQuantity: $buffetQuantity, '
+        'openedAt: $openedAt}';
   }
 }

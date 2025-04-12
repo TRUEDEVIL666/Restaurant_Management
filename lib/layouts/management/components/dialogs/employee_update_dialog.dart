@@ -19,22 +19,17 @@ Future<User?> showAddOrUpdateEmployeeDialog({
   final TextEditingController emailController = TextEditingController();
   final TextEditingController phoneController = TextEditingController();
   final TextEditingController passwordController = TextEditingController();
-  final TextEditingController confirmPasswordController =
-      TextEditingController();
 
   // --- Dialog State ---
   String selectedRole =
       existingEmployee?.role ?? employeeRoles.first; // Default role
   bool obscurePassword = true;
-  bool obscureConfirmPassword = true;
 
   // Pre-fill form if editing
   if (existingEmployee != null) {
     usernameController.text = existingEmployee.username;
     emailController.text = existingEmployee.email;
     phoneController.text = existingEmployee.phoneNumber;
-    // Password is NOT pre-filled for editing for security.
-    // It's only entered if they want to CHANGE it.
   }
 
   User? resultData;
@@ -158,41 +153,6 @@ Future<User?> showAddOrUpdateEmployeeDialog({
                         }
                         return null;
                       },
-                    ),
-                    const SizedBox(height: 10),
-
-                    // --- Confirm Password (Only if Password was entered) ---
-                    // Use Visibility to only show when password has text
-                    Visibility(
-                      visible: passwordController.text.isNotEmpty,
-                      child: TextFormField(
-                        controller: confirmPasswordController,
-                        obscureText: obscureConfirmPassword,
-                        decoration: InputDecoration(
-                          labelText: 'Confirm Password *',
-                          suffixIcon: IconButton(
-                            icon: Icon(
-                              obscureConfirmPassword
-                                  ? Icons.visibility_off
-                                  : Icons.visibility,
-                            ),
-                            onPressed:
-                                () => setDialogState(
-                                  () =>
-                                      obscureConfirmPassword =
-                                          !obscureConfirmPassword,
-                                ),
-                          ),
-                        ),
-                        validator: (value) {
-                          // Only validate if password field has text
-                          if (passwordController.text.isNotEmpty &&
-                              value != passwordController.text) {
-                            return 'Passwords do not match';
-                          }
-                          return null;
-                        },
-                      ),
                     ),
                   ],
                 ),

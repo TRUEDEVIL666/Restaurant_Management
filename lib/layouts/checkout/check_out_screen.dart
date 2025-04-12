@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart'; // For currency formatting
+import 'package:restaurant_management/controllers/table_controller.dart';
 import 'package:restaurant_management/models/components/order.dart';
+import 'package:restaurant_management/services/qr_generator.dart';
 
 import '../../controllers/bill_controller.dart'; // Adjust path
 // Import your models and controller
@@ -16,8 +18,8 @@ class CheckOutScreen extends StatefulWidget {
 }
 
 class _CheckOutScreenState extends State<CheckOutScreen> {
-  final BillController _billController =
-      BillController(); // Get controller instance
+  final BillController _billController = BillController();
+  final TableController _tableController = TableController();
   final NumberFormat currencyFormatter = NumberFormat.currency(
     locale: 'en_US',
     symbol: '\$',
@@ -63,7 +65,7 @@ class _CheckOutScreenState extends State<CheckOutScreen> {
 
     try {
       // 1. Fetch the open bill for the table
-      final fetchedBill = await _billController.getOpenBillByTableNumber(
+      final fetchedBill = await _billController.getRequestedBillByTableNumber(
         widget.tableIndex,
       );
 
@@ -152,7 +154,9 @@ class _CheckOutScreenState extends State<CheckOutScreen> {
     bool success = false;
     try {
       // TODO: Update status to 'paid' or 'closed' based on your workflow
-      success = await _billController.updateBillStatus(_bill!.id ?? '', 'paid');
+      success =
+          await _billController.updateBillStatus(_bill!.id ?? '', 'paid') &&
+          await _tableController.checkOutTable(widget.tableIndex);
 
       if (success) {
         _showSnackBar('Payment successful! Bill closed.');
@@ -348,7 +352,10 @@ class _CheckOutScreenState extends State<CheckOutScreen> {
                       ),
 
                       //TODO
-                      // if (showQR) const QRGeneratorWidget(),
+                      showQR
+                          ? QRGeneratorWidget(amount: _grandTotal.toInt())
+                          : const SizedBox.shrink(),
+
                       const SizedBox(height: 16),
                       // --- Action Buttons ---
                       Padding(

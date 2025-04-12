@@ -1,9 +1,11 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 
 class Bank {
+  final String? id;
   final String bankCode, accountName, accountNumber;
 
   Bank({
+    this.id,
     required this.bankCode,
     required this.accountName,
     required this.accountNumber,
@@ -11,6 +13,7 @@ class Bank {
 
   factory Bank.toObject(DocumentSnapshot doc) {
     return Bank(
+      id: doc.id,
       bankCode: doc['bankCode'],
       accountName: doc['accountName'],
       accountNumber: doc['accountNumber'],
