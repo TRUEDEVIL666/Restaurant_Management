@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:restaurant_management/layouts/home/admin/adminhome_screen.dart';
 
 import '../../../constants.dart';
 import '../../../controllers/user_controller.dart';
@@ -118,11 +119,17 @@ class _SignInFormState extends State<SignInForm> {
     if (user != null) {
       idController.clear();
       passwordController.clear();
-
+    //Kiểm tra người đăng nhập là admin hay employee để chuyển trang
+      Widget destination;
+      if (user.role == 'admin') {
+        destination = AdminHomeScreen(); // 👈 bạn tạo màn này sau
+      } else {
+        destination = const HomeScreen();
+      }
       Navigator.pushAndRemoveUntil(
         context,
-        MaterialPageRoute(builder: (context) => const HomeScreen()),
-        (_) => true,
+        MaterialPageRoute(builder: (context) => destination),
+        (_) => false,
       );
     } else {
       ScaffoldMessenger.of(context).showSnackBar(
