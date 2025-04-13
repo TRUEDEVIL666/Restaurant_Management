@@ -10,19 +10,15 @@ class FirebaseStorageService {
   static final _instance = FirebaseStorageService._internal();
   factory FirebaseStorageService() => _instance;
 
-  Future<bool> uploadImage(File? image, String? imagePath) async {
-    if (image == null || imagePath == null) {
-      return false;
-    }
-
+  Future<bool> uploadImage(File image, String imagePath) async {
     try {
       UploadTask uploadTask = _firebaseStorage.child(imagePath).putFile(image);
       await uploadTask;
       return true;
     } catch (e) {
       print('ERROR UPLOADING IMAGE: $e');
-      return false;
     }
+    return false;
   }
 
   Future<String> getImage(String imgPath) async {

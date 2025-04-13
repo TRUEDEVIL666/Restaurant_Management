@@ -10,8 +10,8 @@ class TableController extends Controller<RestaurantTable> {
   static final _instance = TableController._internal();
   factory TableController() => _instance;
 
-  Future<bool> checkOutTable(int tableId) async {
-    RestaurantTable? table = await _instance.getItem(tableId.toString());
+  Future<bool> checkOutTable(String tableId) async {
+    RestaurantTable? table = await _instance.getItem(tableId);
 
     if (table != null) {
       table.checkOut();
@@ -34,6 +34,6 @@ class TableController extends Controller<RestaurantTable> {
 
   @override
   String getId(RestaurantTable item) {
-    return item.id!;
+    return item.id;
   }
 }

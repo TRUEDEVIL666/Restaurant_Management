@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:restaurant_management/layouts/admin/components/attendance_screen.dart';
+import 'package:restaurant_management/layouts/admin/components/bank_account_screen.dart';
 import 'package:restaurant_management/layouts/admin/components/manage_employee_screen.dart';
 import 'package:restaurant_management/layouts/admin/components/payroll_screen.dart';
 import 'package:restaurant_management/layouts/admin/components/revenue_screen.dart';
@@ -52,6 +53,19 @@ class AdminDashboardScreen extends StatelessWidget {
             () => Navigator.push(
               context,
               MaterialPageRoute(builder: (context) => const PayrollScreen()),
+            ),
+      ),
+      _AdminFeature(
+        title: '🏦 Quản lý tài khoản ngân hàng',
+        subtitle: 'Quản lý tài khoản ',
+        icon: Icons.account_balance_outlined,
+        color: Colors.blueAccent,
+        onTap:
+            () => Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (context) => const BankAccountScreen(),
+              ),
             ),
       ),
     ];

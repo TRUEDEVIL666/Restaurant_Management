@@ -50,18 +50,15 @@ abstract class Controller<T> {
       return db
           .snapshots()
           .map((querySnapshot) {
-            // Listen to snapshots
-            // Map each document snapshot to an object using the subclass's implementation
             return querySnapshot.docs.map((doc) => toObject(doc)).toList();
           })
           .handleError((error) {
             print("Error in getAllStream for ${T.toString()}: $error");
-            // Return an empty list or handle the error as needed
             return <T>[];
           });
     } catch (e) {
       print("Error setting up getAllStream for ${T.toString()}: $e");
-      return Stream.error(e); // Return a stream that emits the error
+      return Stream.error(e);
     }
   }
 

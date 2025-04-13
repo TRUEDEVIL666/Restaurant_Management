@@ -1,7 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 
 class RestaurantTable {
-  final String? id;
+  final String id;
   String? buffetCombo, mealType;
   bool isOccupied;
   bool? buffetOptionsLocked, mealTypeLocked, useDrinkCombo;
@@ -9,7 +9,7 @@ class RestaurantTable {
   Timestamp? openedAt;
 
   RestaurantTable({
-    this.id,
+    required this.id,
     this.buffetCombo,
     this.mealType,
     this.buffetOptionsLocked,
@@ -31,7 +31,12 @@ class RestaurantTable {
     openedAt = null;
   }
 
-  void checkIn(
+  void checkIn() {
+    isOccupied = true;
+    openedAt = Timestamp.now();
+  }
+
+  void setup(
     String buffetCombo,
     String mealType,
     bool useDrinkCombo,
@@ -45,8 +50,6 @@ class RestaurantTable {
     this.buffetQuantity = buffetQuantity;
     this.mealTypeLocked = mealTypeLocked;
     this.buffetOptionsLocked = buffetOptionsLocked;
-    isOccupied = true;
-    openedAt = Timestamp.now();
   }
 
   factory RestaurantTable.toObject(DocumentSnapshot doc) {

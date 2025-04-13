@@ -21,8 +21,8 @@ class _CheckOutScreenState extends State<CheckOutScreen> {
   final BillController _billController = BillController();
   final TableController _tableController = TableController();
   final NumberFormat currencyFormatter = NumberFormat.currency(
-    locale: 'en_US',
-    symbol: '\$',
+    locale: 'vi_VN',
+    symbol: '₫',
   ); // Currency formatter
 
   // --- State Variables ---
@@ -156,7 +156,7 @@ class _CheckOutScreenState extends State<CheckOutScreen> {
       // TODO: Update status to 'paid' or 'closed' based on your workflow
       success =
           await _billController.updateBillStatus(_bill!.id ?? '', 'paid') &&
-          await _tableController.checkOutTable(widget.tableIndex);
+          await _tableController.checkOutTable(widget.tableIndex.toString());
 
       if (success) {
         _showSnackBar('Payment successful! Bill closed.');
@@ -479,8 +479,8 @@ class _ItemTile extends StatelessWidget {
   Widget build(BuildContext context) {
     final itemTotal = price * quantity;
     final currencyFormatter = NumberFormat.currency(
-      locale: 'en_US',
-      symbol: '\$',
+      locale: 'vi_VN',
+      symbol: '₫',
     ); // Use formatter here too
     return ListTile(
       dense: true,

@@ -14,7 +14,7 @@ class MenuManagementScreen extends StatefulWidget {
 
 class _MenuManagementScreenState extends State<MenuManagementScreen> {
   bool _isLoading = false;
-  List<Menu> _menuItems = [];
+  List<FoodMenu> _menuItems = [];
   String? _errorMessage;
   final FoodMenuController menuController = FoodMenuController();
 
@@ -41,7 +41,7 @@ class _MenuManagementScreenState extends State<MenuManagementScreen> {
     });
 
     try {
-      final List<Menu> fetchedItems = await menuController.getAll();
+      final List<FoodMenu> fetchedItems = await menuController.getAll();
       if (mounted) {
         setState(() {
           _menuItems = fetchedItems;
@@ -91,7 +91,7 @@ class _MenuManagementScreenState extends State<MenuManagementScreen> {
     );
   }
 
-  Future<void> _deleteMenu(Menu menuItem) async {
+  Future<void> _deleteMenu(FoodMenu menuItem) async {
     bool confirmDelete =
         await showDialog<bool>(
           context: context,
@@ -147,8 +147,8 @@ class _MenuManagementScreenState extends State<MenuManagementScreen> {
     }
   }
 
-  Future<void> _handleAddOrUpdate({Menu? existingMenu}) async {
-    final Menu? resultMenuItem = await showAddOrUpdateMenuDialog(
+  Future<void> _handleAddOrUpdate({FoodMenu? existingMenu}) async {
+    final FoodMenu? resultMenuItem = await showAddOrUpdateMenuDialog(
       context: context,
       existingMenu: existingMenu,
     );
@@ -434,7 +434,7 @@ class _MenuManagementScreenState extends State<MenuManagementScreen> {
   }
 
   // --- Fancy Menu Item Card ---
-  Widget _buildMenuCard(Menu menuItem, ThemeData theme) {
+  Widget _buildMenuCard(FoodMenu menuItem, ThemeData theme) {
     final bool isAComboWithItems =
         menuItem.isCombo &&
         menuItem.foodList != null &&
@@ -572,7 +572,7 @@ class _MenuManagementScreenState extends State<MenuManagementScreen> {
   }
 
   // --- Helper for Combo Items ---
-  Widget _buildComboItemsList(Menu menuItem, ThemeData theme) {
+  Widget _buildComboItemsList(FoodMenu menuItem, ThemeData theme) {
     return Padding(
       padding: const EdgeInsets.only(top: 4.0), // Add space before list
       child: Column(

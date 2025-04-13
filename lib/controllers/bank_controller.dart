@@ -10,6 +10,19 @@ class BankController extends Controller<Bank> {
   static final _instance = BankController._internal();
   factory BankController() => _instance;
 
+  Future<List<Bank>?> getActiveBanks() async {
+    try {
+      final QuerySnapshot querySnapshot =
+          await db.where('isActive', isEqualTo: true).get();
+      final List<Bank> banks =
+          querySnapshot.docs.map((doc) => toObject(doc)).toList();
+      return banks;
+    } catch (e) {
+      print('Error fetching active banks: $e');
+    }
+    return null;
+  }
+
   @override
   String getId(Bank item) {
     return item.id!;

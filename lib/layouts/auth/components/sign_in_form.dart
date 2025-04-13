@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:restaurant_management/layouts/admin/admin_screen.dart';
 import 'package:restaurant_management/layouts/management/manager_screen.dart';
+import 'package:restaurant_management/layouts/order/table_screen.dart';
 
 import '../../../constants.dart';
 import '../../../controllers/user_controller.dart';
 import '../../../models/user.dart';
-import '../../home/home_screen.dart';
 import '../forgot_password_screen.dart';
 
 class SignInForm extends StatefulWidget {
@@ -126,7 +126,7 @@ class _SignInFormState extends State<SignInForm> {
       } else if (user.role == 'manager') {
         destination = const ManagerDashboardScreen();
       } else {
-        destination = const HomeScreen();
+        destination = const TableScreen();
       }
       Navigator.pushAndRemoveUntil(
         context,
