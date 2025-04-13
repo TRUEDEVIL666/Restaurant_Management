@@ -42,6 +42,10 @@ class EmployeeScreen extends StatelessWidget {
                       child: Text('Nhân viên'),
                     ),
                     DropdownMenuItem(value: 'manager', child: Text('Quản lý')),
+                    DropdownMenuItem(
+                      value: 'admin',
+                      child: Text('Quản trị viên'),
+                    ),
                   ],
                   onChanged: (value) {
                     if (value != null) {
