@@ -150,6 +150,10 @@ class _EmployeeManagementScreenState extends State<EmployeeManagementScreen> {
   }
 
   Future<void> _handleAddOrUpdate({User? existingEmployee}) async {
+    if (existingEmployee != null && existingEmployee.role != 'employee') {
+      return;
+    }
+
     final User? resultEmployeeData = await showAddOrUpdateEmployeeDialog(
       context: context,
       existingEmployee: existingEmployee,
@@ -540,38 +544,40 @@ class _EmployeeManagementScreenState extends State<EmployeeManagementScreen> {
                 ),
               ),
               // --- Action Buttons ---
-              Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  IconButton(
-                    icon: Icon(
-                      Icons.edit_note_outlined,
-                      color: Colors.blue.shade600,
+              if (employee.role == 'employee')
+                Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    IconButton(
+                      icon: Icon(
+                        Icons.edit_note_outlined,
+                        color: Colors.blue.shade600,
+                      ),
+                      tooltip: 'Edit Employee',
+                      visualDensity: VisualDensity.compact,
+                      padding: EdgeInsets.zero, // Reduce padding
+                      onPressed:
+                          _isLoading
+                              ? null
+                              : () => _handleAddOrUpdate(
+                                existingEmployee: employee,
+                              ),
                     ),
-                    tooltip: 'Edit Employee',
-                    visualDensity: VisualDensity.compact,
-                    padding: EdgeInsets.zero, // Reduce padding
-                    onPressed:
-                        _isLoading
-                            ? null
-                            : () =>
-                                _handleAddOrUpdate(existingEmployee: employee),
-                  ),
-                  IconButton(
-                    icon: Icon(
-                      Icons.person_remove_outlined,
-                      color: Colors.redAccent.shade400,
-                    ), // More specific icon
-                    tooltip: 'Delete Employee',
-                    visualDensity: VisualDensity.compact,
-                    padding: EdgeInsets.zero,
-                    onPressed:
-                        _isLoading
-                            ? null
-                            : () => _handleDeleteEmployee(employee),
-                  ),
-                ],
-              ),
+                    IconButton(
+                      icon: Icon(
+                        Icons.person_remove_outlined,
+                        color: Colors.redAccent.shade400,
+                      ), // More specific icon
+                      tooltip: 'Delete Employee',
+                      visualDensity: VisualDensity.compact,
+                      padding: EdgeInsets.zero,
+                      onPressed:
+                          _isLoading
+                              ? null
+                              : () => _handleDeleteEmployee(employee),
+                    ),
+                  ],
+                ),
             ],
           ),
         ),

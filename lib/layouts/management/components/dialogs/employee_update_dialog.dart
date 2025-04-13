@@ -1,13 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:restaurant_management/models/user.dart';
 
-// --- Constants for Roles ---
-const List<String> employeeRoles = [
-  'employee',
-  'manager',
-  'admin',
-]; // Add roles as needed
-
 // --- External Dialog Function ---
 Future<User?> showAddOrUpdateEmployeeDialog({
   required BuildContext context,
@@ -15,14 +8,12 @@ Future<User?> showAddOrUpdateEmployeeDialog({
 }) async {
   // --- Controllers ---
   final formKey = GlobalKey<FormState>(); // For validation
-  final TextEditingController usernameController = TextEditingController();
-  final TextEditingController emailController = TextEditingController();
-  final TextEditingController phoneController = TextEditingController();
-  final TextEditingController passwordController = TextEditingController();
+  final TextEditingController usernameController = TextEditingController(),
+      emailController = TextEditingController(),
+      phoneController = TextEditingController(),
+      passwordController = TextEditingController();
 
   // --- Dialog State ---
-  String selectedRole =
-      existingEmployee?.role ?? employeeRoles.first; // Default role
   bool obscurePassword = true;
 
   // Pre-fill form if editing
@@ -96,28 +87,6 @@ Future<User?> showAddOrUpdateEmployeeDialog({
                     ),
                     const SizedBox(height: 15),
 
-                    // --- Role Dropdown ---
-                    DropdownButtonFormField<String>(
-                      value: selectedRole,
-                      decoration: const InputDecoration(labelText: 'Role *'),
-                      items:
-                          employeeRoles.map((String role) {
-                            return DropdownMenuItem<String>(
-                              value: role,
-                              child: Text(role),
-                            );
-                          }).toList(),
-                      onChanged: (String? newValue) {
-                        if (newValue != null) {
-                          setDialogState(() => selectedRole = newValue);
-                        }
-                      },
-                      validator:
-                          (value) =>
-                              value == null ? 'Please select a role' : null,
-                    ),
-                    const SizedBox(height: 15),
-
                     // --- Password (Required on Add, Optional on Edit) ---
                     TextFormField(
                       controller: passwordController,
@@ -177,7 +146,7 @@ Future<User?> showAddOrUpdateEmployeeDialog({
                       resultData?.username = usernameController.text.trim();
                       resultData?.email = emailController.text.trim();
                       resultData?.phoneNumber = phoneController.text.trim();
-                      resultData?.role = selectedRole;
+                      resultData?.role = 'employee';
                       if (plainPassword.isNotEmpty) {
                         resultData?.password = plainPassword;
                       }
@@ -186,7 +155,7 @@ Future<User?> showAddOrUpdateEmployeeDialog({
                         username: usernameController.text.trim(),
                         email: emailController.text.trim(),
                         phoneNumber: phoneController.text.trim(),
-                        role: selectedRole,
+                        role: 'employee',
                         password: plainPassword,
                       );
                     }
