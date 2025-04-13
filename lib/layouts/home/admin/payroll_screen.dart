@@ -28,24 +28,43 @@ class PayrollScreen extends StatelessWidget {
               final salary = (userData['salary'] ?? 0).toDouble();
               final coefficient = (userData['coefficient'] ?? 1).toDouble();
 
-              return FutureBuilder<QuerySnapshot>(
+              return FutureBuilder<DocumentSnapshot>(
                 future: FirebaseFirestore.instance
-                    .collection('attendance')
-                    .where('userId', isEqualTo: userId)
+                    .collection('users')
+                    .doc(userId)
                     .get(),
-                builder: (context, attendanceSnapshot) {
-                  if (!attendanceSnapshot.hasData) {
+                builder: (context, userDetailsSnapshot) {
+                  if (!userDetailsSnapshot.hasData) {
                     return const ListTile(title: Text('Đang tính lương...'));
                   }
 
-                  final daysWorked = attendanceSnapshot.data!.docs.length;
+                  // Lấy loginHistory từ dữ liệu người dùng
+                  final loginHistory = userDetailsSnapshot.data!['loginHistory'] as List<dynamic>?;
+
+                  // Đảm bảo loginHistory không null và có kiểu Timestamp
+                  if (loginHistory == null || loginHistory.isEmpty) {
+                    return const ListTile(title: Text('Không có lịch sử đăng nhập'));
+                  }
+
+                  // Đếm số lần đăng nhập (số ngày làm việc)
+                  int daysWorked = 0;
+
+                  // Kiểm tra xem mỗi phần tử trong loginHistory có phải là Timestamp không
+                  for (var login in loginHistory) {
+                    if (login is Timestamp) {
+                      daysWorked++;
+                    }
+                  }
+                  
+                  // Tính lương: Lương = Lương cơ bản * Hệ số * Số ngày làm việc
                   final total = salary * coefficient * daysWorked;
 
                   return Card(
                     child: ListTile(
                       leading: const Icon(Icons.account_balance_wallet_outlined),
                       title: Text(username),
-                      subtitle: Text("Đi làm: $daysWorked ngày • Hệ số: $coefficient × Lương: ₫${_formatCurrency(salary)}"),
+                      subtitle: Text(
+                          "Đi làm: $daysWorked ngày • Hệ số: $coefficient × Lương cơ bản: ₫${_formatCurrency(salary)}"),
                       trailing: Text("₫${_formatCurrency(total)}"),
                     ),
                   );
