@@ -1,11 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart'; // For currency formatting
+import 'package:restaurant_management/controllers/table_controller.dart';
 import 'package:restaurant_management/models/components/order.dart';
+import 'package:restaurant_management/services/qr_generator.dart';
 
 import '../../controllers/bill_controller.dart'; // Adjust path
 // Import your models and controller
 import '../../models/bill.dart';
-import '../../services/qr_generator.dart'; // Assuming this exists
 
 class CheckOutScreen extends StatefulWidget {
   final int tableIndex;
@@ -17,11 +18,11 @@ class CheckOutScreen extends StatefulWidget {
 }
 
 class _CheckOutScreenState extends State<CheckOutScreen> {
-  final BillController _billController =
-      BillController(); // Get controller instance
+  final BillController _billController = BillController();
+  final TableController _tableController = TableController();
   final NumberFormat currencyFormatter = NumberFormat.currency(
-    locale: 'en_US',
-    symbol: '\$',
+    locale: 'vi_VN',
+    symbol: '₫',
   ); // Currency formatter
 
   // --- State Variables ---
@@ -64,7 +65,7 @@ class _CheckOutScreenState extends State<CheckOutScreen> {
 
     try {
       // 1. Fetch the open bill for the table
-      final fetchedBill = await _billController.getOpenBillByTableNumber(
+      final fetchedBill = await _billController.getRequestedBillByTableNumber(
         widget.tableIndex,
       );
 
@@ -153,12 +154,14 @@ class _CheckOutScreenState extends State<CheckOutScreen> {
     bool success = false;
     try {
       // TODO: Update status to 'paid' or 'closed' based on your workflow
-      success = await _billController.updateBillStatus(_bill!.id ?? '', 'paid');
+      success =
+          await _billController.updateBillTotal(_bill?.id ?? '', _grandTotal) &&
+          await _billController.updateBillStatus(_bill?.id ?? '', 'paid') &&
+          await _tableController.checkOutTable(widget.tableIndex.toString());
 
       if (success) {
         _showSnackBar('Payment successful! Bill closed.');
-        // Optionally navigate back or show a success screen
-        if (mounted) Navigator.of(context).pop(); // Example: Go back
+        if (mounted) Navigator.of(context).pop();
       } else {
         _showSnackBar(
           'Failed to update bill status. Please try again.',
@@ -348,8 +351,10 @@ class _CheckOutScreenState extends State<CheckOutScreen> {
                         ],
                       ),
 
-                      if (showQR)
-                        const QRGeneratorWidget(), // Use if keyword for cleaner conditional UI
+                      //TODO
+                      showQR
+                          ? QRGeneratorWidget(amount: _grandTotal.toInt())
+                          : const SizedBox.shrink(),
 
                       const SizedBox(height: 16),
                       // --- Action Buttons ---
@@ -474,8 +479,8 @@ class _ItemTile extends StatelessWidget {
   Widget build(BuildContext context) {
     final itemTotal = price * quantity;
     final currencyFormatter = NumberFormat.currency(
-      locale: 'en_US',
-      symbol: '\$',
+      locale: 'vi_VN',
+      symbol: '₫',
     ); // Use formatter here too
     return ListTile(
       dense: true,

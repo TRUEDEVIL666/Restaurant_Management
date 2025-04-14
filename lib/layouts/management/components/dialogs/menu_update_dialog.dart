@@ -3,9 +3,9 @@ import 'package:restaurant_management/models/menu.dart';
 // Import your Menu model definition
 
 // Renamed to be public, requires context, returns Future<Menu?>
-Future<Menu?> showAddOrUpdateMenuDialog({
+Future<FoodMenu?> showAddOrUpdateMenuDialog({
   required BuildContext context,
-  Menu? existingMenu,
+  FoodMenu? existingMenu,
 }) async {
   // --- Controllers ---
   final TextEditingController nameController = TextEditingController();
@@ -32,7 +32,7 @@ Future<Menu?> showAddOrUpdateMenuDialog({
   }
 
   // Variable to hold the result when 'Save' is pressed
-  Menu? resultMenu;
+  FoodMenu? resultMenu;
 
   await showDialog<void>(
     context: context,
@@ -214,7 +214,7 @@ Future<Menu?> showAddOrUpdateMenuDialog({
                   }
 
                   // --- Prepare Result ---
-                  resultMenu = Menu(
+                  resultMenu = FoodMenu(
                     // Create the Menu object
                     id: nameOrId, // Or use existingMenu.id for updates if needed
                     isCombo: isCombo,

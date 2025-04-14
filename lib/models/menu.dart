@@ -1,20 +1,20 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 
-class Menu {
+class FoodMenu {
   final String id;
   bool isCombo;
   double price;
   List<Map<String, dynamic>>? foodList;
 
-  Menu({
+  FoodMenu({
     required this.id,
     required this.isCombo,
     required this.price,
     this.foodList,
   });
 
-  factory Menu.toObject(DocumentSnapshot doc) {
-    return Menu(
+  factory FoodMenu.toObject(DocumentSnapshot doc) {
+    return FoodMenu(
       id: doc.id,
       isCombo: doc['isCombo'],
       price: doc['price'].toDouble(),

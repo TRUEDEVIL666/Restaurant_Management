@@ -1,10 +1,12 @@
 import 'package:flutter/material.dart';
+import 'package:restaurant_management/layouts/admin/admin_screen.dart';
+import 'package:restaurant_management/layouts/management/manager_screen.dart';
+import 'package:restaurant_management/layouts/order/table_screen.dart';
 import 'package:restaurant_management/layouts/home/admin/adminhome_screen.dart';
 
 import '../../../constants.dart';
 import '../../../controllers/user_controller.dart';
 import '../../../models/user.dart';
-import '../../home/home_screen.dart';
 import '../forgot_password_screen.dart';
 
 class SignInForm extends StatefulWidget {
@@ -125,6 +127,13 @@ class _SignInFormState extends State<SignInForm> {
         destination = AdminHomeScreen(); // 👈 bạn tạo màn này sau
       } else {
         destination = const HomeScreen();
+      }      Widget destination;
+      if (user.role == 'admin') {
+        destination = AdminDashboardScreen();
+      } else if (user.role == 'manager') {
+        destination = const ManagerDashboardScreen();
+      } else {
+        destination = const TableScreen();
       }
       Navigator.pushAndRemoveUntil(
         context,
