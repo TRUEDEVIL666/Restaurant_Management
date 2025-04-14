@@ -96,6 +96,26 @@ class BillController extends Controller<Bill> {
     }
   }
 
+  Future<bool> updateBillTotal(String billId, double newTotal) async {
+    if (billId.isEmpty) {
+      print("Error updating bill total: Bill ID cannot be empty.");
+      return false;
+    }
+    if (newTotal < 0) {
+      print("Error updating bill total: New total cannot be negative.");
+      return false;
+    }
+
+    try {
+      await db.doc(billId).update({'total': newTotal});
+      print("Bill $billId total updated to $newTotal");
+      return true;
+    } catch (e, stackTrace) {
+      print("ERROR UPDATING BILL TOTAL for ID $billId: $e\n$stackTrace");
+    }
+    return false;
+  }
+
   Future<List<BillOrder>> getOrdersForBill(String billId) async {
     // ... (implementation remains the same, consider adding more error details) ...
     List<BillOrder> orders = [];
@@ -166,11 +186,7 @@ class BillController extends Controller<Bill> {
       // 3. Prepare the data for the new order document
       final Map<String, dynamic> newOrderData = {
         'timestamp': Timestamp.now(), // Record when this order batch was placed
-        'items':
-            orderItems, // The list of item maps [{menuItemId, name, quantity, unitPrice}, ...]
-        // Add other relevant fields if needed:
-        // 'status': 'pending', // e.g., 'pending', 'sent_to_kitchen', 'delivered'
-        // 'waiterId': currentUserId, // If you track which employee took the order
+        'items': orderItems,
       };
 
       // 4. Add the new document to the subcollection
@@ -181,8 +197,8 @@ class BillController extends Controller<Bill> {
     } catch (e, stackTrace) {
       // 5. Handle potential errors during the Firestore operation
       print("Error adding order to bill $billId: $e\n$stackTrace");
-      return false; // Indicate failure
     }
+    return false;
   }
 
   Future<bool> updateBillStatus(String billId, String newStatus) async {
@@ -231,28 +247,6 @@ class BillController extends Controller<Bill> {
       );
     }
     return null;
-  }
-
-  Future<double> getTotalBillCostForTable(int tableNumber) async {
-    // ... (implementation remains the same) ...
-    // Consider adding error handling if getOpenBillByTableNumber returns null
-    double totalCost = 0.0;
-    try {
-      Bill? openBill = await getOpenBillByTableNumber(tableNumber);
-      if (openBill != null && openBill.id != null) {
-        // Ensure bill and ID exist
-        totalCost = await getTotalBillCost(openBill.id!);
-      } else {
-        print(
-          "No open bill found for table $tableNumber when calculating total cost.",
-        );
-      }
-    } catch (e, stackTrace) {
-      print(
-        "ERROR GETTING TOTAL BILL COST for table $tableNumber: $e\n$stackTrace",
-      );
-    }
-    return totalCost;
   }
 
   Future<double> getTotalBillCost(String billId) async {

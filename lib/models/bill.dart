@@ -4,12 +4,14 @@ class Bill {
   final String? id;
   String status;
   int tableNumber;
+  double? total;
   Timestamp timestamp;
 
   Bill({
     this.id,
     required this.status,
     required this.tableNumber,
+    this.total,
     required this.timestamp,
   });
 
@@ -20,6 +22,7 @@ class Bill {
       status: doc['status'],
       tableNumber: doc['tableNumber'],
       timestamp: doc['timestamp'],
+      total: doc['total'],
     );
   }
 
@@ -28,6 +31,7 @@ class Bill {
       'status': status,
       'tableNumber': tableNumber,
       'timestamp': timestamp,
+      'total': total,
     };
   }
 
@@ -35,12 +39,13 @@ class Bill {
     return {
       'status': status,
       'tableNumber': tableNumber,
+      'total': total,
       'timestamp': Timestamp.now(),
     };
   }
 
   @override
   String toString() {
-    return 'Bill{id: $id, status: $status, tableNumber: $tableNumber, timestamp: $timestamp}';
+    return 'Bill{id: $id, status: $status, tableNumber: $tableNumber, total: $total, timestamp: $timestamp}';
   }
 }

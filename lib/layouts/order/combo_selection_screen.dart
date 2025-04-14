@@ -4,9 +4,11 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 // Flutter Core & UI
 import 'package:flutter/material.dart';
+import 'package:restaurant_management/controllers/bill_controller.dart';
 import 'package:restaurant_management/controllers/menu_controller.dart';
 import 'package:restaurant_management/controllers/table_controller.dart';
 import 'package:restaurant_management/layouts/menu/menu_screen.dart';
+import 'package:restaurant_management/models/bill.dart';
 import 'package:restaurant_management/models/menu.dart';
 import 'package:restaurant_management/models/table.dart';
 import 'package:shimmer/shimmer.dart'; // For loading shimmer
@@ -25,6 +27,7 @@ class _ComboSelectionScreenState extends State<ComboSelectionScreen> {
   // --- Controllers ---
   final TableController _tableController = TableController();
   final FoodMenuController _menuController = FoodMenuController();
+  final BillController _billController = BillController();
 
   // --- State Variables ---
   RestaurantTable? _currentTableData; // Store fetched table data
@@ -201,6 +204,7 @@ class _ComboSelectionScreenState extends State<ComboSelectionScreen> {
 
     setState(() => _isSaving = true); // Indicate saving process
 
+    // --- 1. Prepare Table Data Update ---
     // Update local object with final selections before saving
     _currentTableData!.isOccupied = true; // Ensure table is marked occupied
     _currentTableData!.openedAt ??=
@@ -210,59 +214,150 @@ class _ComboSelectionScreenState extends State<ComboSelectionScreen> {
         true; // Lock everything on final confirm
     _currentTableData!.useDrinkCombo = useDrinkCombo;
 
-    // Set buffet-specific fields or clear them based on meal type
+    String? finalBuffetComboId =
+        null; // To pass to MenuScreen and for order item
+
     if (selectedMealType == 'buffet') {
       _currentTableData!.buffetCombo =
           selectedBuffetComboId; // Save selected combo ID
       _currentTableData!.buffetQuantity = buffetQuantity;
+      finalBuffetComboId =
+          selectedBuffetComboId; // Set combo ID for order item & navigation
     } else {
       // 'order' type
       _currentTableData!.buffetCombo = null; // Clear buffet fields
       _currentTableData!.buffetQuantity = null;
     }
 
-    try {
-      // Attempt to update the item in Firestore
-      bool success = await _tableController.updateItem(_currentTableData!);
-      if (!mounted) return; // Check again after async operation
+    // --- 2. Attempt to Save Table Data ---
+    bool tableUpdateSuccess = false;
+    bool buffetOrderSuccess = true; // Default to true if not buffet type
 
-      if (success) {
-        // Navigate to the MenuScreen after successful save
-        // Pass the selected buffet combo ID (will be null for 'order' type)
-        _navigateToMenu(passedBuffetComboId: _currentTableData!.buffetCombo);
-        // No need to set _isSaving = false as we are navigating away
-      } else {
-        // Revert lock state if save failed (optional, but good practice)
-        _currentTableData!.buffetOptionsLocked = false;
-        setState(() => _isSaving = false); // Saving complete (failed)
-        _showSnackBar(
-          'Failed to save final choices.',
-          isError: true,
-        ); // Show error feedback
+    try {
+      tableUpdateSuccess = await _tableController.updateItem(
+        _currentTableData!,
+      );
+
+      if (!mounted) return; // Check mount status after await
+
+      if (!tableUpdateSuccess) {
+        // If table update failed, show error and stop
+        _showSnackBar('Failed to save table configuration.', isError: true);
+        setState(() => _isSaving = false);
+        return;
       }
+
+      // --- 3. Add Buffet Combo as Order Item (if applicable) ---
+      if (tableUpdateSuccess &&
+          selectedMealType == 'buffet' &&
+          finalBuffetComboId != null) {
+        buffetOrderSuccess = await _addBuffetOrderToBill(
+          finalBuffetComboId,
+          buffetQuantity,
+        );
+        if (!mounted) return; // Check again
+
+        if (!buffetOrderSuccess) {
+          // If adding the buffet order failed, show error and stop (table data WAS saved though)
+          // Optionally: Attempt to revert table data? More complex.
+          _showSnackBar(
+            'Failed to add buffet combo to the bill. Please add manually.',
+            isError: true,
+          );
+          // We still might want to navigate, but inform the user. Let's prevent navigation for now.
+          setState(() => _isSaving = false);
+          return;
+        }
+      }
+
+      // --- 4. Navigate Only if Everything Succeeded ---
+      if (tableUpdateSuccess && buffetOrderSuccess) {
+        // Navigate to the MenuScreen after successful save and potential order add
+        _navigateToMenu(passedBuffetComboId: finalBuffetComboId);
+        // No need to set _isSaving = false as we are navigating away
+      }
+      // else: Errors were handled and state was updated above
     } catch (e) {
-      // Revert lock state on exception
-      _currentTableData!.buffetOptionsLocked = false;
+      print("Error during confirm/proceed: $e");
       if (!mounted) return;
-      setState(() => _isSaving = false); // Saving complete (failed)
-      _showSnackBar(
-        'Error saving final choices: $e',
-        isError: true,
-      ); // Show error feedback
+      // Revert lock state on general exception (optional)
+      _currentTableData!.buffetOptionsLocked = false;
+      _currentTableData!.mealTypeLocked =
+          false; // Might need more nuanced revert
+      setState(() => _isSaving = false);
+      _showSnackBar('An unexpected error occurred: $e', isError: true);
+    } finally {
+      // Ensure saving state is reset if we didn't navigate away due to an error handled above
+      if (mounted && !(tableUpdateSuccess && buffetOrderSuccess)) {
+        setState(() => _isSaving = false);
+      }
     }
   }
 
-  // --- Navigation Helper ---
+  // --- Helper Function to Add Buffet Order Item ---
+  Future<bool> _addBuffetOrderToBill(String comboId, int quantity) async {
+    if (_currentTableData == null) return false; // Should not happen here
+
+    String? billId;
+    int? tableNumber = int.tryParse(
+      widget.tableId.replaceAll(RegExp(r'[^0-9]'), ''),
+    );
+    if (tableNumber == null) {
+      print("Error adding buffet order: Invalid table ID format.");
+      return false;
+    }
+
+    try {
+      // 1. Find or Create Bill ID
+      Bill? openBill = await _billController.getOpenBillByTableNumber(
+        tableNumber,
+      );
+      if (openBill == null) {
+        DocumentReference? billRef = await _billController.addBill(tableNumber);
+        if (billRef != null) {
+          billId = billRef.id;
+        } else {
+          throw Exception('Failed to create a new bill for buffet order.');
+        }
+      } else {
+        billId = openBill.id!;
+      }
+
+      // 2. Get Combo Details (Price)
+      // Find the selected combo in the already fetched list
+      final selectedCombo = _availableCombos.firstWhere(
+        (c) => c.id == comboId,
+        // Provide a default if somehow not found (shouldn't happen if selection logic is right)
+        orElse: () => FoodMenu(id: comboId, isCombo: true, price: 0.0),
+      );
+
+      // 3. Format the Order Item
+      final orderItem = {
+        'name': selectedCombo.id,
+        'quantity': quantity, // Use the selected buffet quantity
+        'unitPrice': selectedCombo.price,
+      };
+
+      // 4. Add to Bill's Subcollection
+      return await _billController.addOrderToBill(billId, [
+        orderItem,
+      ]); // Pass as a list
+    } catch (e) {
+      print("Error adding buffet order item to bill: $e");
+      return false;
+    }
+  }
+
+  // --- Navigation Helper (remains the same) ---
   void _navigateToMenu({required String? passedBuffetComboId}) {
-    // Use pushReplacement to replace this screen in the navigation stack
+    // ... (implementation as before) ...
     Navigator.pushReplacement(
       context,
       MaterialPageRoute(
         builder:
             (context) => MenuScreen(
-              tableId:
-                  widget
-                      .tableId, // Pass the selected combo ID (null if not buffet)
+              tableId: widget.tableId,
+              buffetCombo: passedBuffetComboId, // Pass the ID
             ),
       ),
     );

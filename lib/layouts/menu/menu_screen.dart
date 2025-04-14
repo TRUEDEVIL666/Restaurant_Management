@@ -223,7 +223,6 @@ class _MenuScreenState extends State<MenuScreen> {
       // 2. Format order items (remains the same)
       final orderItemsToSubmit =
           _selectedQuantities.entries.map((entry) {
-            // ... (formatting logic as before) ...
             final itemId = entry.key;
             final quantity = entry.value;
             final menuItem = _orderableItems.firstWhere(

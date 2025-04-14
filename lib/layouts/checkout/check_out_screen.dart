@@ -155,13 +155,13 @@ class _CheckOutScreenState extends State<CheckOutScreen> {
     try {
       // TODO: Update status to 'paid' or 'closed' based on your workflow
       success =
-          await _billController.updateBillStatus(_bill!.id ?? '', 'paid') &&
+          await _billController.updateBillTotal(_bill?.id ?? '', _grandTotal) &&
+          await _billController.updateBillStatus(_bill?.id ?? '', 'paid') &&
           await _tableController.checkOutTable(widget.tableIndex.toString());
 
       if (success) {
         _showSnackBar('Payment successful! Bill closed.');
-        // Optionally navigate back or show a success screen
-        if (mounted) Navigator.of(context).pop(); // Example: Go back
+        if (mounted) Navigator.of(context).pop();
       } else {
         _showSnackBar(
           'Failed to update bill status. Please try again.',
