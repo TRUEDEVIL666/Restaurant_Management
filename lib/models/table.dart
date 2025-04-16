@@ -17,7 +17,7 @@ class RestaurantTable {
     this.useDrinkCombo,
     this.mealTypeLocked,
     this.buffetQuantity,
-    this.openedAt,
+    this.openedAt, 
   }) : isOccupied = isOccupied ?? false;
 
   void checkOut() {

@@ -79,6 +79,8 @@ class _TableScreenState extends State<TableScreen> {
     }
   }
 
+  
+
   // --- Navigation for STARTING a NEW Order (Available Table) ---
   Future<void> _navigateToComboSelection(RestaurantTable selectedTable) async {
     print('Confirmed opening Table ID: ${selectedTable.id} for NEW order.');

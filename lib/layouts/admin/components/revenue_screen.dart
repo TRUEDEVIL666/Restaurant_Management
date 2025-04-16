@@ -13,7 +13,7 @@ class RevenueScreen extends StatefulWidget {
 class _RevenueScreenState extends State<RevenueScreen> {
   DateTimeRange? _selectedRange;
   String _mode = 'daily'; // hoặc 'monthly'
-
+  
   Map<String, double> _revenueData = {};
   bool _loading = false;
 
@@ -38,19 +38,19 @@ class _RevenueScreenState extends State<RevenueScreen> {
     final snapshot =
         await FirebaseFirestore.instance
             .collection('bills')
-            .where('createdAt', isGreaterThanOrEqualTo: _selectedRange!.start)
-            .where('createdAt', isLessThanOrEqualTo: _selectedRange!.end)
+            .where('timestamp', isGreaterThanOrEqualTo: _selectedRange!.start)
+            .where('timestamp', isLessThanOrEqualTo: _selectedRange!.end)
             .get();
 
     for (var doc in snapshot.docs) {
       final data = doc.data();
-      final time = (data['createdAt'] as Timestamp).toDate();
+      final time = (data['timestamp'] as Timestamp).toDate();
       final key =
           _mode == 'daily'
               ? DateFormat('dd/MM').format(time)
               : DateFormat('MM/yyyy').format(time);
 
-      final amount = (data['total'] as num).toDouble();
+      final amount = (data['total']);
       revenueMap[key] = (revenueMap[key] ?? 0) + amount;
     }
 
@@ -80,6 +80,7 @@ class _RevenueScreenState extends State<RevenueScreen> {
   Widget build(BuildContext context) {
     final labels = _revenueData.keys.toList();
     final values = _revenueData.values.toList();
+    final maxValue = values.isEmpty ? 0 : values.reduce((a, b) => a > b ? a : b);
 
     return Scaffold(
       appBar: AppBar(title: const Text('📊 Thống kê tổng thu')),
@@ -125,10 +126,28 @@ class _RevenueScreenState extends State<RevenueScreen> {
                       ? const Center(child: CircularProgressIndicator())
                       : BarChart(
                         BarChartData(
-                          alignment: BarChartAlignment.spaceBetween,
+                          alignment: BarChartAlignment.start,
                           titlesData: FlTitlesData(
+                             topTitles: AxisTitles(
+    sideTitles: SideTitles(showTitles: false), // 👈 Tắt số phía trên cột
+  ),
                             leftTitles: AxisTitles(
-                              sideTitles: SideTitles(showTitles: true),
+                              sideTitles: SideTitles(
+                                showTitles: true,
+                                getTitlesWidget: (value, TitleMeta meta) {
+                                  final intValue = value.toInt();
+                                  if (intValue % 10 == 0) {
+                                    return Text(
+                                      intValue.toString(),
+                                      style: const TextStyle(fontSize: 10),
+                                    );
+                                  }
+                                  return const SizedBox();
+                                },
+                              ),
+                            ),
+                            rightTitles: AxisTitles(
+                              sideTitles: SideTitles(showTitles: false), // Ẩn cột bên phải
                             ),
                             bottomTitles: AxisTitles(
                               sideTitles: SideTitles(
@@ -148,22 +167,20 @@ class _RevenueScreenState extends State<RevenueScreen> {
                               ),
                             ),
                           ),
-
                           barGroups: List.generate(labels.length, (index) {
                             return BarChartGroupData(
                               x: index,
                               barRods: [
                                 BarChartRodData(
                                   toY: values[index],
-                                  color: Colors.deepPurple,
+                                  color: Colors.green,
                                   width: 18,
                                   borderRadius: BorderRadius.circular(6),
+                                  rodStackItems: [],
                                   backDrawRodData: BackgroundBarChartRodData(
                                     show: true,
-                                    toY:
-                                        values.reduce((a, b) => a > b ? a : b) +
-                                        100000,
-                                    color: Colors.grey[200],
+                                    toY: maxValue * 1.2 , // Chỉ cao hơn 20%
+                                    color: const Color.fromARGB(255, 255, 255, 255),
                                   ),
                                 ),
                               ],
