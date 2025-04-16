@@ -48,8 +48,8 @@ class _MenuScreenState extends State<MenuScreen> {
 
   // --- Formatting ---
   final NumberFormat currencyFormatter = NumberFormat.currency(
-    locale: 'en_US',
-    symbol: '\$',
+    locale: 'vi_VN',
+    symbol: 'đ',
   );
 
   @override

@@ -913,7 +913,7 @@ class _MenuManagementScreenState extends State<MenuManagementScreen> {
 
   // --- Currency Formatter (Add if needed for price) ---
   final NumberFormat currencyFormatter = NumberFormat.currency(
-    locale: 'en_US',
-    symbol: '\$',
+    locale: 'vi_VN',
+    symbol: 'đ',
   );
 } // End of _MenuManagementScreenState

@@ -3,8 +3,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 class FoodMenu {
   final String id;
   String? imgPath;
-  bool isCombo;
-  bool isActive;
+  bool isCombo, isActive;
   double price;
   List<Map<String, dynamic>>? foodList;
 

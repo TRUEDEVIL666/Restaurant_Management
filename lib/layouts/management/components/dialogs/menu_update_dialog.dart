@@ -64,7 +64,7 @@ Future<FoodMenu?> showAddOrUpdateMenuDialog({
                     ),
                     decoration: const InputDecoration(
                       labelText: 'Price',
-                      prefixText: '\$ ',
+                      suffixText: ' đ',
                     ),
                   ),
                   const SizedBox(height: 15),
