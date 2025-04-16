@@ -10,6 +10,11 @@ class FoodMenuController extends Controller<FoodMenu> {
   static final _instance = FoodMenuController._internal();
   factory FoodMenuController() => _instance;
 
+  Future<List<FoodMenu>> getAllActive() async {
+    final querySnapshot = await db.where('isActive', isEqualTo: true).get();
+    return querySnapshot.docs.map((doc) => toObject(doc)).toList();
+  }
+
   @override
   FoodMenu toObject(DocumentSnapshot doc) {
     return FoodMenu.toObject(doc);

@@ -64,7 +64,7 @@ Future<FoodMenu?> showAddOrUpdateMenuDialog({
                     ),
                     decoration: const InputDecoration(
                       labelText: 'Price',
-                      prefixText: '\$ ',
+                      suffixText: ' đ',
                     ),
                   ),
                   const SizedBox(height: 15),
@@ -215,8 +215,8 @@ Future<FoodMenu?> showAddOrUpdateMenuDialog({
 
                   // --- Prepare Result ---
                   resultMenu = FoodMenu(
-                    // Create the Menu object
-                    id: nameOrId, // Or use existingMenu.id for updates if needed
+                    id: nameOrId,
+                    imgPath: '',
                     isCombo: isCombo,
                     price: price,
                     foodList: isCombo ? currentFoodList : null,

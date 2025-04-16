@@ -2,21 +2,26 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 
 class FoodMenu {
   final String id;
-  bool isCombo;
+  String? imgPath;
+  bool isCombo, isActive;
   double price;
   List<Map<String, dynamic>>? foodList;
 
   FoodMenu({
     required this.id,
+    this.imgPath,
     required this.isCombo,
+    bool? isActive,
     required this.price,
     this.foodList,
-  });
+  }) : isActive = isActive ?? true;
 
   factory FoodMenu.toObject(DocumentSnapshot doc) {
     return FoodMenu(
       id: doc.id,
+      imgPath: doc['imgPath'],
       isCombo: doc['isCombo'],
+      isActive: doc['isActive'],
       price: doc['price'].toDouble(),
       foodList:
           doc['foodList'] != null
@@ -26,6 +31,12 @@ class FoodMenu {
   }
 
   Map<String, dynamic> toFirestore() {
-    return {'isCombo': isCombo, 'price': price, 'foodList': foodList};
+    return {
+      'imgPath': imgPath,
+      'isCombo': isCombo,
+      'isActive': isActive,
+      'price': price,
+      'foodList': foodList,
+    };
   }
 }

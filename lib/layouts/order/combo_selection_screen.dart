@@ -66,7 +66,7 @@ class _ComboSelectionScreenState extends State<ComboSelectionScreen> {
       // Fetch table data and all menu items concurrently
       final results = await Future.wait([
         _tableController.getItem(widget.tableId), // Fetch Table Data by ID
-        _menuController.getAll(), // Fetch All Menu Items
+        _menuController.getAllActive(), // Fetch All Menu Items
       ]);
 
       if (!mounted) return; // Check again after asynchronous operations
@@ -328,7 +328,8 @@ class _ComboSelectionScreenState extends State<ComboSelectionScreen> {
       final selectedCombo = _availableCombos.firstWhere(
         (c) => c.id == comboId,
         // Provide a default if somehow not found (shouldn't happen if selection logic is right)
-        orElse: () => FoodMenu(id: comboId, isCombo: true, price: 0.0),
+        orElse:
+            () => FoodMenu(id: comboId, imgPath: "", isCombo: true, price: 0.0),
       );
 
       // 3. Format the Order Item

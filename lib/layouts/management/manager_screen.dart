@@ -4,6 +4,7 @@ import 'package:flutter_staggered_animations/flutter_staggered_animations.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:restaurant_management/controllers/bill_controller.dart';
 import 'package:restaurant_management/firebase_options.dart';
+import 'package:restaurant_management/layouts/management/components/bill_history_screen.dart';
 import 'package:restaurant_management/layouts/management/components/bill_management_screen.dart';
 import 'package:restaurant_management/layouts/management/components/employee_management_screen.dart';
 import 'package:restaurant_management/layouts/management/components/menu_management_screen.dart';
@@ -282,6 +283,19 @@ class _ManagerDashboardScreenState extends State<ManagerDashboardScreen> {
                     onTap: () {
                       _navigateToScreen(context, const TableManagementScreen());
                       print('Navigating to Table Configuration...');
+                    },
+                  ),
+                  const SizedBox(height: 20),
+
+                  _buildDashboardTile(
+                    context: context,
+                    icon: Icons.edit_note,
+                    label: 'Bill History',
+                    subtitle: 'See previous bills and payments',
+                    color: Colors.purple.shade100.withOpacity(0.3),
+                    onTap: () {
+                      _navigateToScreen(context, const BillHistoryScreen());
+                      print('Navigating to Bill History...');
                     },
                   ),
                   // Add more tiles here if needed

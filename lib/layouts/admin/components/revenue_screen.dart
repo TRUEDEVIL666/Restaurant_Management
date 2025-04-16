@@ -1,6 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:flutter/material.dart';
 import 'package:fl_chart/fl_chart.dart';
+import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 
 class RevenueScreen extends StatefulWidget {
@@ -80,7 +80,8 @@ class _RevenueScreenState extends State<RevenueScreen> {
   Widget build(BuildContext context) {
     final labels = _revenueData.keys.toList();
     final values = _revenueData.values.toList();
-    final maxValue = values.isEmpty ? 0 : values.reduce((a, b) => a > b ? a : b);
+    final maxValue =
+        values.isEmpty ? 0 : values.reduce((a, b) => a > b ? a : b);
 
     return Scaffold(
       appBar: AppBar(title: const Text('📊 Thống kê tổng thu')),
@@ -128,9 +129,11 @@ class _RevenueScreenState extends State<RevenueScreen> {
                         BarChartData(
                           alignment: BarChartAlignment.start,
                           titlesData: FlTitlesData(
-                             topTitles: AxisTitles(
-    sideTitles: SideTitles(showTitles: false), // 👈 Tắt số phía trên cột
-  ),
+                            topTitles: AxisTitles(
+                              sideTitles: SideTitles(
+                                showTitles: false,
+                              ), // 👈 Tắt số phía trên cột
+                            ),
                             leftTitles: AxisTitles(
                               sideTitles: SideTitles(
                                 showTitles: true,
@@ -147,7 +150,9 @@ class _RevenueScreenState extends State<RevenueScreen> {
                               ),
                             ),
                             rightTitles: AxisTitles(
-                              sideTitles: SideTitles(showTitles: false), // Ẩn cột bên phải
+                              sideTitles: SideTitles(
+                                showTitles: false,
+                              ), // Ẩn cột bên phải
                             ),
                             bottomTitles: AxisTitles(
                               sideTitles: SideTitles(
@@ -179,8 +184,13 @@ class _RevenueScreenState extends State<RevenueScreen> {
                                   rodStackItems: [],
                                   backDrawRodData: BackgroundBarChartRodData(
                                     show: true,
-                                    toY: maxValue * 1.2 , // Chỉ cao hơn 20%
-                                    color: const Color.fromARGB(255, 255, 255, 255),
+                                    toY: maxValue * 1.2, // Chỉ cao hơn 20%
+                                    color: const Color.fromARGB(
+                                      255,
+                                      255,
+                                      255,
+                                      255,
+                                    ),
                                   ),
                                 ),
                               ],

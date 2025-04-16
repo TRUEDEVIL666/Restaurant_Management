@@ -39,6 +39,59 @@ class BillController extends Controller<Bill> {
     }
   }
 
+  Future<List<Bill>> getBillsByFilter({
+    required DateTime selectedDate,
+    String?
+    statusFilter, // Nullable status, e.g., 'open', 'paid', 'requested', 'void'
+  }) async {
+    try {
+      // Calculate start and end Timestamps for the selected day
+      DateTime startOfDay = DateTime(
+        selectedDate.year,
+        selectedDate.month,
+        selectedDate.day,
+        0,
+        0,
+        0,
+      );
+      DateTime endOfDay = DateTime(
+        selectedDate.year,
+        selectedDate.month,
+        selectedDate.day,
+        23,
+        59,
+        59,
+        999,
+      );
+      Timestamp startTimestamp = Timestamp.fromDate(startOfDay);
+      Timestamp endTimestamp = Timestamp.fromDate(endOfDay);
+
+      // Start building the query
+      Query query = db
+          .where('timestamp', isGreaterThanOrEqualTo: startTimestamp)
+          .where('timestamp', isLessThanOrEqualTo: endTimestamp);
+
+      // Add status filter if provided and not 'All'
+      if (statusFilter != null && statusFilter != 'All') {
+        query = query.where('status', isEqualTo: statusFilter);
+      }
+
+      // Order by time (most recent first)
+      query = query.orderBy('timestamp', descending: true);
+
+      // Execute the query
+      QuerySnapshot querySnapshot = await query.get();
+
+      // Map results to Bill objects
+      return querySnapshot.docs.map((doc) => toObject(doc)).toList();
+    } catch (e) {
+      print("Error getting bills by filter: $e");
+      // Rethrow or return empty list depending on desired error handling
+      // return [];
+      rethrow;
+    }
+  }
+
   Stream<List<Bill>> getRequestedBillsStream() {
     // ... (implementation remains the same) ...
     try {
